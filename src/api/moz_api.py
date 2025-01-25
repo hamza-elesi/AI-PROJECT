@@ -3,12 +3,14 @@ import aiohttp
 import asyncio
 from urllib.parse import quote_plus
 
+# api/moz_api.py
 class MozClient:
-    def __init__(self, access_id: str, secret_key: str, rate_limiter):
-        self.access_id = access_id
-        self.secret_key = secret_key
-        self.base_url = "https://lsapi.seomoz.com/v2"
-        self.rate_limiter = rate_limiter
+    def __init__(self, token: str, rate_limiter):
+        self.token = token
+        self.headers = {
+            'Authorization': f'Bearer {self.token}',
+            'Content-Type': 'application/json'
+        }
 
     async def get_domain_metrics(self, domain: str) -> Dict[str, Any]:
         """Get domain authority and metrics from Moz"""
