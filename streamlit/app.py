@@ -1,9 +1,17 @@
+import sys
+import os
+from pathlib import Path
+
+# Add project root to Python path
+project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root))
+
 import streamlit as st
-from data.collector import DataCollector
-from reports.generator import ReportGenerator
-from .config import Config
-from .components.metrics import MetricsDisplay
-from .components.report import ReportDisplay
+from src.data.collector import DataCollector
+from src.reports.generator import ReportGenerator
+from config import Config
+from streamlit.components.metrics import MetricsDisplay
+from streamlit.components.report import ReportDisplay
 from typing import Dict, Any
 import os
 from dotenv import load_dotenv
@@ -76,13 +84,13 @@ class SEOApp:
 
 if __name__ == "__main__":
     # Initialize app with dependencies
-    from api.moz_api import MozClient
-    from scraper.web_scraper import SEOScraper
-    from data.cache import DataCache
-    from data.collector import DataCollector
-    from data.aggregator import DataAggregator
-    from reports.generator import ReportGenerator
-    from api.rate_limiter import RateLimiter
+    from src.api.moz_api import MozClient
+    from src.scraper.web_scraper import SEOScraper
+    from src.data.cache import DataCache
+    from src.data.collector import DataCollector
+    from src.data.aggregator import DataAggregator
+    from src.reports.generator import ReportGenerator
+    from src.api.rate_limiter import RateLimiter
 
     # Instantiate dependencies
     rate_limiter = RateLimiter()
