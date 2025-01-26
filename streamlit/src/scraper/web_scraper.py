@@ -1,10 +1,9 @@
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
-import requests
-from typing import Dict, Any, Optional, List
-from .validators import URLValidator
-import asyncio
 import aiohttp
+from typing import Dict, Any
+from .validators import URLValidator
+
 
 class SEOScraper:
     def __init__(self):
@@ -27,7 +26,7 @@ class SEOScraper:
                 async with session.get(url) as response:
                     html = await response.text()
                     validation = self.validator.validate_response(response)
-                    
+
                     if not validation['is_success']:
                         return {'error': f"HTTP {validation['status_code']}"}
 
@@ -38,7 +37,7 @@ class SEOScraper:
     async def analyze_content(self, html: str, url: str) -> Dict[str, Any]:
         """Analyze page content for SEO elements"""
         soup = BeautifulSoup(html, 'html.parser')
-        
+
         return {
             'meta_tags': self._analyze_meta_tags(soup),
             'headings': self._analyze_headings(soup),
@@ -60,10 +59,7 @@ class SEOScraper:
 
     def _analyze_headings(self, soup: BeautifulSoup) -> Dict[str, int]:
         """Analyze heading structure"""
-        return {
-            f'h{i}': len(soup.find_all(f'h{i}')) 
-            for i in range(1, 7)
-        }
+        return {f'h{i}': len(soup.find_all(f'h{i}')) for i in range(1, 7)}
 
     def _analyze_images(self, soup: BeautifulSoup) -> Dict[str, Any]:
         """Analyze image optimization"""
@@ -78,10 +74,10 @@ class SEOScraper:
         """Analyze internal and external links"""
         links = soup.find_all('a')
         parsed_base = urlparse(base_url)
-        
+
         internal_links = []
         external_links = []
-        
+
         for link in links:
             href = link.get('href')
             if href:
@@ -89,7 +85,7 @@ class SEOScraper:
                     internal_links.append(href)
                 else:
                     external_links.append(href)
-                    
+
         return {
             'internal_links': len(internal_links),
             'external_links': len(external_links),
@@ -100,7 +96,7 @@ class SEOScraper:
         """Basic content quality analysis"""
         text = soup.get_text()
         words = text.split()
-        
+
         return {
             'word_count': len(words),
             'paragraphs': len(soup.find_all('p')),
@@ -114,6 +110,3 @@ class SEOScraper:
             'has_favicon': bool(soup.find('link', {'rel': ['icon', 'shortcut icon']})),
             'has_viewport': bool(soup.find('meta', {'name': 'viewport'}))
         }
-    
-
-    

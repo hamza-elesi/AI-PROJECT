@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, Any
 import aiohttp
 import asyncio
@@ -5,7 +6,13 @@ import uuid
 import os
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 class MozClient:
     def __init__(self, api_token: str, rate_limiter):
@@ -14,6 +21,8 @@ class MozClient:
         :param api_token: API token provided for Moz API access.
         :param rate_limiter: A rate limiter instance to control API calls.
         """
+        if not api_token:
+            raise ValueError("API token is required. Please set the 'MOZ_TOKEN' environment variable.")
         self.api_token = api_token
         self.headers = {
             'x-moz-token': self.api_token,
@@ -52,10 +61,18 @@ class MozClient:
                     json=payload
                 ) as response:
                     if response.status != 200:
+                        logger.error("API returned status %s", response.status)
                         return {'error': f"API returned status {response.status}"}
                     data = await response.json()
                     return self._process_domain_metrics(data.get("result", {}))
+            except aiohttp.ClientError as e:
+                logger.error("Network error: %s", str(e))
+                return {'error': 'Network error'}
+            except asyncio.TimeoutError:
+                logger.error("Request timed out")
+                return {'error': 'Request timed out'}
             except Exception as e:
+                logger.error("Error fetching domain metrics: %s", str(e))
                 return {'error': str(e)}
 
     def _process_domain_metrics(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -74,22 +91,3 @@ class MozClient:
             'last_crawled': site_metrics.get('last_crawled', 'N/A'),
         }
 
-
-# Example usage:
-if __name__ == "__main__":
-    class MockRateLimiter:
-        async def wait_if_needed(self, api_name):
-            await asyncio.sleep(0.1)  # Simulate rate limiting
-
-    # Replace with your Moz API token
-    API_TOKEN = os.getenv("MOZ_TOKEN")
-
-    moz_client = MozClient(API_TOKEN, MockRateLimiter())
-
-    async def main():
-        domain = "https://moz.com/blog"
-        print("Fetching domain metrics...")
-        domain_metrics = await moz_client.get_domain_metrics(domain)
-        print(domain_metrics)
-
-    asyncio.run(main())
