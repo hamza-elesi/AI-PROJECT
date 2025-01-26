@@ -1,24 +1,33 @@
-from data.colllector import DataCollector
-from reports.generator import ReportGenerator
 import streamlit as st
-from typing import Dict, Any
+from data.collector import DataCollector
+from reports.generator import ReportGenerator
 from .config import Config
 from .components.metrics import MetricsDisplay
 from .components.report import ReportDisplay
+from typing import Dict, Any
+import os
+from dotenv import load_dotenv
+import asyncio
+load_dotenv()
 
 class SEOApp:
-    def __init__(self, data_collector, report_generator):
+    def __init__(self, data_collector: DataCollector, report_generator: ReportGenerator):
+        """
+        Initialize the SEO app with its dependencies.
+        :param data_collector: Instance of DataCollector for data gathering.
+        :param report_generator: Instance of ReportGenerator for creating reports.
+        """
         self.data_collector = data_collector
         self.report_generator = report_generator
         Config.setup_page()
 
     def run(self):
-        """Main app execution"""
-        st.title("SEO Analyse Tool")
+        """Main app execution."""
+        st.title("SEO Analysis Tool")
         
         # URL Input
         url = st.text_input(
-            "Voer website URL in",
+            "Enter the website URL",
             placeholder="https://example.com"
         )
         
@@ -26,7 +35,7 @@ class SEOApp:
             with st.spinner("Analyzing website..."):
                 try:
                     # Collect and analyze data
-                    collected_data = self.data_collector.collect_all_data(url)
+                    collected_data = asyncio.run(self.data_collector.collect_all_data(url))
                     report_data = self.report_generator.generate_report(collected_data)
                     
                     # Display results
@@ -36,18 +45,18 @@ class SEOApp:
                     st.error(f"Error analyzing website: {str(e)}")
 
     def _display_results(self, data: Dict[str, Any]):
-        """Display analysis results"""
+        """Display analysis results."""
         # Overview metrics
         MetricsDisplay.show_overview(data.get('overview', {}))
-        
-        # Search Console metrics
-        MetricsDisplay.show_search_console_metrics(
-            data.get('performance_metrics', {})
-        )
         
         # Technical Analysis
         ReportDisplay.show_technical_analysis(
             data.get('technical_analysis', {})
+        )
+        
+        # Backlink Analysis
+        ReportDisplay.show_backlink_analysis(
+            data.get('backlinks', {})
         )
         
         # Issues and Recommendations
@@ -67,5 +76,22 @@ class SEOApp:
 
 if __name__ == "__main__":
     # Initialize app with dependencies
-    app = SEOApp(DataCollector, ReportGenerator)
+    from api.moz_api import MozClient
+    from scraper.web_scraper import SEOScraper
+    from data.cache import DataCache
+    from data.collector import DataCollector
+    from data.aggregator import DataAggregator
+    from reports.generator import ReportGenerator
+    from api.rate_limiter import RateLimiter
+
+    # Instantiate dependencies
+    rate_limiter = RateLimiter()
+    moz_client = MozClient(token=os.getenv("MOZ_TOKEN"), rate_limiter=rate_limiter)
+    scraper = SEOScraper()
+    cache = DataCache()
+    data_collector = DataCollector(moz_client, scraper, cache)
+    report_generator = ReportGenerator()
+
+    # Run the app
+    app = SEOApp(data_collector, report_generator)
     app.run()
