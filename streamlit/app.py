@@ -1,105 +1,50 @@
-import sys
-import os
-from pathlib import Path
-
-# Add project root to Python path
-project_root = Path(__file__).parent.parent
-sys.path.append(str(project_root))
-
+import asyncio
 import streamlit as st
+from components.metrics import MetricsDisplay
+from components.report import ReportDisplay
 from src.data.collector import DataCollector
 from src.reports.generator import ReportGenerator
-from config import Config
-from streamlit.components.metrics import MetricsDisplay
-from streamlit.components.report import ReportDisplay
-from typing import Dict, Any
+from src.api.moz_api import MozClient
+from src.scraper.web_scraper import SEOScraper
+from src.data.cache import DataCache
+from src.api.rate_limiter import RateLimiter
 import os
 from dotenv import load_dotenv
-import asyncio
+
 load_dotenv()
 
+
 class SEOApp:
-    def __init__(self, data_collector: DataCollector, report_generator: ReportGenerator):
-        """
-        Initialize the SEO app with its dependencies.
-        :param data_collector: Instance of DataCollector for data gathering.
-        :param report_generator: Instance of ReportGenerator for creating reports.
-        """
+    def __init__(self, data_collector, report_generator):
         self.data_collector = data_collector
         self.report_generator = report_generator
-        Config.setup_page()
 
     def run(self):
-        """Main app execution."""
         st.title("SEO Analysis Tool")
-        
-        # URL Input
-        url = st.text_input(
-            "Enter the website URL",
-            placeholder="https://example.com"
-        )
-        
+        url = st.text_input("Enter the website URL", placeholder="https://example.com")
+
         if url:
             with st.spinner("Analyzing website..."):
                 try:
-                    # Collect and analyze data
                     collected_data = asyncio.run(self.data_collector.collect_all_data(url))
-                    report_data = self.report_generator.generate_report(collected_data)
-                    
-                    # Display results
-                    self._display_results(report_data)
-                    
+                    self._display_results(collected_data)
                 except Exception as e:
                     st.error(f"Error analyzing website: {str(e)}")
 
-    def _display_results(self, data: Dict[str, Any]):
+    def _display_results(self, data):
         """Display analysis results."""
-        # Overview metrics
-        MetricsDisplay.show_overview(data.get('overview', {}))
-        
-        # Technical Analysis
-        ReportDisplay.show_technical_analysis(
-            data.get('technical_analysis', {})
-        )
-        
-        # Backlink Analysis
-        ReportDisplay.show_backlink_analysis(
-            data.get('backlinks', {})
-        )
-        
-        # Issues and Recommendations
-        ReportDisplay.show_issues_table(
-            data.get('recommendations', [])
-        )
-        
-        # Export options
-        if st.button("Download Report (PDF)"):
-            pdf_report = self.report_generator.generate_pdf(data)
-            st.download_button(
-                label="Download PDF",
-                data=pdf_report,
-                file_name="seo_report.pdf",
-                mime="application/pdf"
-            )
+        MetricsDisplay.show_overview(data.get("overview", {}))
+        ReportDisplay.show_technical_analysis(data.get("scraped_data", {}))
+        ReportDisplay.show_backlink_analysis(data.get("moz_data", {}).get("metrics", {}))
+
 
 if __name__ == "__main__":
-    # Initialize app with dependencies
-    from src.api.moz_api import MozClient
-    from src.scraper.web_scraper import SEOScraper
-    from src.data.cache import DataCache
-    from src.data.collector import DataCollector
-    from src.data.aggregator import DataAggregator
-    from src.reports.generator import ReportGenerator
-    from src.api.rate_limiter import RateLimiter
-
-    # Instantiate dependencies
     rate_limiter = RateLimiter()
-    moz_client = MozClient(token=os.getenv("MOZ_TOKEN"), rate_limiter=rate_limiter)
+    moz_client = MozClient(api_token=os.getenv("MOZ_TOKEN"), rate_limiter=rate_limiter)
     scraper = SEOScraper()
     cache = DataCache()
     data_collector = DataCollector(moz_client, scraper, cache)
     report_generator = ReportGenerator()
 
-    # Run the app
     app = SEOApp(data_collector, report_generator)
     app.run()
