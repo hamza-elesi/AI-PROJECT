@@ -1,6 +1,5 @@
 # Virtual environment
-venv/
-seo/  # Replace with your virtual environment folder name if different
+seo/
 
 # Python cache and build files
 __pycache__/
@@ -14,7 +13,6 @@ build/
 
 # Environment variables
 .env
-.env.local
 
 # IDE-specific files
 .vscode/
