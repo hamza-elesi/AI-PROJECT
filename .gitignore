@@ -1,1 +1,21 @@
+# Virtual environment
+venv/
+seo/  # Replace with your virtual environment folder name if different
+
+# Python cache and build files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc
+*.egg-info/
+dist/
+build/
+
+# Environment variables
 .env
+.env.local
+
+# IDE-specific files
+.vscode/
+.idea/
