@@ -16,28 +16,73 @@ class ReportDisplay:
 
         # Meta Tags Analysis
         with st.expander("Meta Tags"):
-            st.json(data.get("meta_tags", {}))
+            meta_tags = data.get("meta_tags", {})
+            if not meta_tags:
+                st.write("No meta tags found.")
+            else:
+                for key, value in meta_tags.items():
+                    st.write(f"**{key.replace('_', ' ').title()}**: {value or 'Not Available'}")
 
-        # Technical Elements Analysis
+        # Headings Analysis
+        with st.expander("Headings"):
+            headings = data.get("headings", {})
+            st.write("Heading Counts:")
+            for heading, count in headings.items():
+                st.write(f"{heading.upper()}: {count}")
+
+        # Images Analysis
+        with st.expander("Images"):
+            images = data.get("images", {})
+            st.write("Image Statistics:")
+            st.write(f"Total Images: {images.get('total_images', 0)}")
+            st.write(f"Missing Alt Attributes: {images.get('missing_alt', 0)}")
+            st.write(f"Missing Src Attributes: {images.get('missing_src', 0)}")
+
+        # Links Analysis
+        with st.expander("Links"):
+            links = data.get("links", {})
+            st.write("Link Statistics:")
+            st.write(f"Internal Links: {links.get('internal_links', 0)}")
+            st.write(f"External Links: {links.get('external_links', 0)}")
+            st.write(f"Total Links: {links.get('total_links', 0)}")
+
+        # Content Quality
+        with st.expander("Content Quality"):
+            content = data.get("content", {})
+            st.write("Content Quality Metrics:")
+            st.write(f"Word Count: {content.get('word_count', 0)}")
+            st.write(f"Paragraphs: {content.get('paragraphs', 0)}")
+            st.write(f"Has Structured Data: {content.get('has_structured_data', False)}")
+
+        # Technical Elements
         with st.expander("Technical Elements"):
-            st.json(data.get("technical_elements", {}))
+            technical = data.get("technical", {})
+            st.write("Technical SEO Elements:")
+            st.write(f"Canonical Tag Present: {technical.get('has_canonical', False)}")
+            st.write(f"Favicon Present: {technical.get('has_favicon', False)}")
+            st.write(f"Viewport Tag Present: {technical.get('has_viewport', False)}")
 
     @staticmethod
-    def show_backlink_analysis(backlinks_data: Dict[str, Any]):
+    def show_backlink_analysis(data: Dict[str, Any]):
         """Display backlink analysis."""
         st.subheader("Backlink Analysis")
 
-        if not backlinks_data or "error" in backlinks_data:
+        if not data or "error" in data:
             st.error("Error retrieving backlink data.")
             return
 
         col1, col2, col3 = st.columns(3)
+
         with col1:
-            st.metric("Domain Authority", backlinks_data.get("domain_authority", "N/A"))
+            st.metric("Domain Authority", data.get("domain_authority", 0))
         with col2:
-            st.metric("Total Links", backlinks_data.get("total_links", "N/A"))
+            st.metric("Total Links", data.get("total_links", 0))
         with col3:
-            st.metric("Linking Domains", backlinks_data.get("linking_domains", "N/A"))
+            st.metric("Linking Domains", data.get("linking_domains", 0))
+
+        # Additional details, if available
+        with st.expander("Backlink Details"):
+            st.json(data)
 
     @staticmethod
     def show_issues_table(issues: List[Dict[str, Any]]):

@@ -42,8 +42,7 @@ class URLValidator:
     def validate_response(self, response: requests.Response) -> Dict[str, Any]:
         """Validate HTTP response"""
         return {
-            'status_code': response.status_code,
-            'is_success': 200 <= response.status_code < 300,
+            'status_code': response.status,
+            'is_success': 200 <= response.status < 300,
             'content_type': response.headers.get('content-type', ''),
-            'response_time': response.elapsed.total_seconds()
         }

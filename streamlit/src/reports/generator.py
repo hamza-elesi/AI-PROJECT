@@ -1,109 +1,90 @@
-from typing import Dict, Any, List
-from .translations import DutchTranslator
-import pandas as pd
-from datetime import datetime
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from typing import Dict, Any
+from io import BytesIO
+
 
 class ReportGenerator:
-    def __init__(self):
-        self.translator = DutchTranslator()
+    def generate_pdf(self, data: Dict[str, Any]) -> bytes:
+        """Generate a PDF report from the analysis results."""
+        buffer = BytesIO()
+        pdf = canvas.Canvas(buffer, pagesize=letter)
+        pdf.setTitle("SEO Analysis Report")
 
-    def generate_report(self, aggregated_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate complete SEO report"""
-        try:
-            return {
-                'metadata': self._generate_metadata(),
-                'overview': self._generate_overview(aggregated_data),
-                'technical_analysis': self._generate_technical_analysis(aggregated_data),
-                'recommendations': self._generate_recommendations(aggregated_data),
-                'performance_metrics': self._generate_performance_metrics(aggregated_data)
-            }
-        except Exception as e:
-            return {'error': str(e)}
+        # Title
+        pdf.setFont("Helvetica-Bold", 16)
+        pdf.drawString(200, 750, "SEO Analysis Report")
 
-    def _generate_metadata(self) -> Dict[str, str]:
-        """Generate report metadata"""
-        return {
-            'generated_date': datetime.now().strftime('%Y-%m-%d %H:%M'),
-            'report_type': self.translator.translate('seo_analysis'),
-            'version': '1.0'
-        }
+        pdf.setFont("Helvetica", 12)
 
-    def _generate_overview(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate overview section"""
-        overview = data.get('overview', {})
-        return {
-            self.translator.translate('seo_score'): data.get('seo_score', 0),
-            self.translator.translate('visibility'): overview.get('visibility', {}),
-            self.translator.translate('authority'): overview.get('authority', {})
-        }
+        # Moz Metrics
+        pdf.drawString(50, 720, "Moz Metrics:")
+        pdf.setFont("Helvetica", 10)
+        moz_data = data.get("moz_data", {}).get("metrics", {})
+        y = 700
+        for key, value in moz_data.items():
+            pdf.drawString(60, y, f"{key.replace('_', ' ').title()}: {value}")
+            y -= 20
 
-    def _generate_technical_analysis(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate technical analysis section"""
-        technical = data.get('technical_seo', {})
-        return {
-            'meta_tags': self._format_meta_tags(technical.get('meta_tags_status', {})),
-            'technical_elements': self._format_technical_elements(technical.get('technical_elements', {}))
-        }
+        # Scraped Data
+        pdf.setFont("Helvetica", 12)
+        pdf.drawString(50, y - 20, "Scraped Data:")
+        pdf.setFont("Helvetica", 10)
+        scraped_data = data.get("scraped_data", {})
+        y -= 40
 
-    def _generate_recommendations(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Generate recommendations with time and cost estimates"""
-        issues = self._identify_issues(data)
-        return [
-            {
-                'issue': self.translator.translate(issue['type']),
-                'priority': self.translator.translate(issue['priority']),
-                'estimated_time': f"{issue['time']} {self.translator.translate('hours')}",
-                'estimated_cost': f"€{issue['cost_min']}-{issue['cost_max']}",
-                'steps': issue['steps']
-            }
-            for issue in issues
-        ]
+        # Meta Tags
+        pdf.drawString(60, y, "Meta Tags:")
+        y -= 20
+        meta_tags = scraped_data.get("meta_tags", {})
+        for key, value in meta_tags.items():
+            pdf.drawString(70, y, f"{key.replace('_', ' ').title()}: {value}")
+            y -= 20
 
-    def _generate_performance_metrics(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate performance metrics section"""
-        performance = data.get('performance', {})
-        return {
-            self.translator.translate('search_visibility'): {
-                self.translator.translate('clicks'): performance.get('clicks', 0),
-                self.translator.translate('impressions'): performance.get('impressions', 0),
-                self.translator.translate('ctr'): f"{performance.get('ctr', 0)}%",
-                self.translator.translate('position'): performance.get('average_position', 0)
-            },
-            self.translator.translate('backlinks'): data.get('backlinks', {})
-        }
+        # Headings
+        pdf.drawString(60, y - 20, "Headings:")
+        y -= 40
+        headings = scraped_data.get("headings", {})
+        for key, value in headings.items():
+            pdf.drawString(70, y, f"{key}: {value}")
+            y -= 20
 
-    def _identify_issues(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Identify issues and create recommendations"""
-        issues = []
-        technical = data.get('technical_seo', {})
-        content = data.get('content_analysis', {})
+        # Images
+        pdf.drawString(60, y - 20, "Images:")
+        y -= 40
+        images = scraped_data.get("images", {})
+        for key, value in images.items():
+            pdf.drawString(70, y, f"{key.replace('_', ' ').title()}: {value}")
+            y -= 20
 
-        # Check meta tags
-        if not technical.get('meta_tags_status', {}).get('has_description'):
-            issues.append({
-                'type': 'missing_meta_description',
-                'priority': 'high',
-                'time': '2-3',
-                'cost_min': 100,
-                'cost_max': 150,
-                'steps': [
-                    self.translator.translate('review_missing_meta'),
-                    self.translator.translate('create_meta_descriptions'),
-                    self.translator.translate('implement_changes')
-                ]
-            })
+        # Links
+        pdf.drawString(60, y - 20, "Links:")
+        y -= 40
+        links = scraped_data.get("links", {})
+        for key, value in links.items():
+            pdf.drawString(70, y, f"{key.replace('_', ' ').title()}: {value}")
+            y -= 20
 
-        # Add more issue identification logic...
-        return issues
+        # Content Quality
+        pdf.drawString(60, y - 20, "Content Quality:")
+        y -= 40
+        content = scraped_data.get("content", {})
+        for key, value in content.items():
+            pdf.drawString(70, y, f"{key.replace('_', ' ').title()}: {value}")
+            y -= 20
 
-    def generate_pdf(self, report_data: Dict[str, Any]) -> bytes:
-        """Generate PDF report"""
-        # PDF generation logic would go here
-        # For Phase 1A, this could be a simple template
-        pass
+        # Technical Elements
+        pdf.drawString(60, y - 20, "Technical Elements:")
+        y -= 40
+        technical = scraped_data.get("technical", {})
+        for key, value in technical.items():
+            pdf.drawString(70, y, f"{key.replace('_', ' ').title()}: {value}")
+            y -= 20
 
-    def generate_html(self, report_data: Dict[str, Any]) -> str:
-        """Generate HTML report"""
-        # HTML generation logic would go here
-        # For Phase 1A, this could be a simple template
-        pass
+        # Footer
+        pdf.setFont("Helvetica", 8)
+        pdf.drawString(50, 50, "Generated by SEO Analysis Tool")
+
+        pdf.save()
+        buffer.seek(0)
+        return buffer.getvalue()
