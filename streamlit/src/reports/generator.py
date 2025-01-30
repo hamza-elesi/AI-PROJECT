@@ -1,90 +1,96 @@
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
 from typing import Dict, Any
 from io import BytesIO
+from src.reports.translations import DutchTranslator
 
 
 class ReportGenerator:
+    def __init__(self):
+        self.translator = DutchTranslator()  # Initialize the translator
+
     def generate_pdf(self, data: Dict[str, Any]) -> bytes:
-        """Generate a PDF report from the analysis results."""
+        """Generate a structured and formatted PDF report from the analysis results."""
         buffer = BytesIO()
         pdf = canvas.Canvas(buffer, pagesize=letter)
-        pdf.setTitle("SEO Analysis Report")
+        pdf.setTitle("SEO Analyse Rapport")  # Translated Title
+
+        # Define initial positions for text
+        y_position = 750  # Start from the top of the page
+        line_spacing = 20  # Space between lines
+
+        # Function to add headings
+        def add_heading(text, y_pos):
+            pdf.setFont("Helvetica-Bold", 14)
+            pdf.setFillColor(colors.darkblue)
+            pdf.drawString(50, y_pos, text)
+            return y_pos - 30  # Move cursor down
+
+        # Function to add normal text
+        def add_text(text, y_pos):
+            pdf.setFont("Helvetica", 10)
+            pdf.setFillColor(colors.black)
+            pdf.drawString(60, y_pos, text)
+            return y_pos - line_spacing  # Move cursor down
 
         # Title
-        pdf.setFont("Helvetica-Bold", 16)
-        pdf.drawString(200, 750, "SEO Analysis Report")
+        y_position = add_heading(self.translator.translate("seo_analysis_report"), y_position)
 
-        pdf.setFont("Helvetica", 12)
-
-        # Moz Metrics
-        pdf.drawString(50, 720, "Moz Metrics:")
-        pdf.setFont("Helvetica", 10)
+        # Moz Metrics Section
+        y_position = add_heading(self.translator.translate("moz_metrics"), y_position)
         moz_data = data.get("moz_data", {}).get("metrics", {})
-        y = 700
-        for key, value in moz_data.items():
-            pdf.drawString(60, y, f"{key.replace('_', ' ').title()}: {value}")
-            y -= 20
+        for key, value in self.translator.translate_dict(moz_data).items():
+            y_position = add_text(f"{key}: {value}", y_position)
 
-        # Scraped Data
-        pdf.setFont("Helvetica", 12)
-        pdf.drawString(50, y - 20, "Scraped Data:")
-        pdf.setFont("Helvetica", 10)
+        # Scraped Data Section
+        y_position = add_heading(self.translator.translate("scraped_data"), y_position)
         scraped_data = data.get("scraped_data", {})
-        y -= 40
 
         # Meta Tags
-        pdf.drawString(60, y, "Meta Tags:")
-        y -= 20
+        y_position = add_heading(self.translator.translate("meta_tags"), y_position)
         meta_tags = scraped_data.get("meta_tags", {})
-        for key, value in meta_tags.items():
-            pdf.drawString(70, y, f"{key.replace('_', ' ').title()}: {value}")
-            y -= 20
+        for key, value in self.translator.translate_dict(meta_tags).items():
+            y_position = add_text(f"{key}: {value or 'Niet Beschikbaar'}", y_position)
 
         # Headings
-        pdf.drawString(60, y - 20, "Headings:")
-        y -= 40
+        y_position = add_heading(self.translator.translate("headings"), y_position)
         headings = scraped_data.get("headings", {})
-        for key, value in headings.items():
-            pdf.drawString(70, y, f"{key}: {value}")
-            y -= 20
+        for key, value in self.translator.translate_dict(headings).items():
+            y_position = add_text(f"{key}: {value}", y_position)
 
         # Images
-        pdf.drawString(60, y - 20, "Images:")
-        y -= 40
+        y_position = add_heading(self.translator.translate("image_optimization"), y_position)
         images = scraped_data.get("images", {})
-        for key, value in images.items():
-            pdf.drawString(70, y, f"{key.replace('_', ' ').title()}: {value}")
-            y -= 20
+        for key, value in self.translator.translate_dict(images).items():
+            y_position = add_text(f"{key}: {value}", y_position)
 
         # Links
-        pdf.drawString(60, y - 20, "Links:")
-        y -= 40
+        y_position = add_heading(self.translator.translate("links"), y_position)
         links = scraped_data.get("links", {})
-        for key, value in links.items():
-            pdf.drawString(70, y, f"{key.replace('_', ' ').title()}: {value}")
-            y -= 20
+        for key, value in self.translator.translate_dict(links).items():
+            y_position = add_text(f"{key}: {value}", y_position)
 
         # Content Quality
-        pdf.drawString(60, y - 20, "Content Quality:")
-        y -= 40
+        y_position = add_heading(self.translator.translate("content_quality"), y_position)
         content = scraped_data.get("content", {})
-        for key, value in content.items():
-            pdf.drawString(70, y, f"{key.replace('_', ' ').title()}: {value}")
-            y -= 20
+        for key, value in self.translator.translate_dict(content).items():
+            y_position = add_text(f"{key}: {value}", y_position)
 
         # Technical Elements
-        pdf.drawString(60, y - 20, "Technical Elements:")
-        y -= 40
+        y_position = add_heading(self.translator.translate("technical_seo"), y_position)
         technical = scraped_data.get("technical", {})
-        for key, value in technical.items():
-            pdf.drawString(70, y, f"{key.replace('_', ' ').title()}: {value}")
-            y -= 20
+        for key, value in self.translator.translate_dict(technical).items():
+            y_position = add_text(f"{key}: {value}", y_position)
 
         # Footer
         pdf.setFont("Helvetica", 8)
-        pdf.drawString(50, 50, "Generated by SEO Analysis Tool")
+        pdf.setFillColor(colors.gray)
+        pdf.drawString(50, 50, self.translator.translate("generated_by_seo_tool"))
 
+        # Save the PDF
         pdf.save()
         buffer.seek(0)
         return buffer.getvalue()
