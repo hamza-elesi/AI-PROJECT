@@ -84,6 +84,8 @@ if __name__ == "__main__":
     scraper = SEOScraper()
     cache = DataCache()
     data_collector = DataCollector(moz_client, scraper, cache)
+
+    # Use the translation-enabled report generator
     report_generator = ReportGenerator()
 
     app = SEOApp(data_collector, report_generator)
