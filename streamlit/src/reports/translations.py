@@ -77,25 +77,40 @@ class DutchTranslator:
     def __init__(self):
         # Main translations dictionary
         self.translations = {
-            # Report Titles
-            'report_title': 'SEO Analyse Rapport',
-            'overview_title': 'Algemeen Overzicht',
-            'technical_title': 'Technische SEO Analyse',
-            'content_title': 'Content Analyse',
-            'backlink_title': 'Backlink Analyse',
-            'recommendations_title': 'Aanbevelingen',
-            
-            # Metrics
+            # General Report
+            'seo_analysis_report': 'SEO Analyse Rapport',
+            'moz_metrics': 'Moz Statistieken',
+            'scraped_data': 'Opgehaalde Gegevens',
+            'generated_by_seo_tool': 'Gegenereerd door SEO Analyse Tool',
+
+            # SEO Metrics
             'domain_authority': 'Domein Autoriteit',
             'page_authority': 'Pagina Autoriteit',
             'backlinks': 'Backlinks',
-            
-            # Ratings
-            'good': 'Goed',
-            'average': 'Gemiddeld',
-            'poor': 'Verbetering nodig',
-            
-            # Priorities
+            'total_links': 'Totale Links',
+            'linking_domains': 'Verwijzende Domeinen',
+            'spam_score': 'Spam Score',
+            'last_crawled': 'Laatst Gecrawld',
+
+            # Technical SEO
+            'technical_seo': 'Technische SEO',
+            'meta_tags': 'Meta Tags',
+            'missing_meta': 'Ontbrekende Meta Tags',
+            'image_optimization': 'Afbeeldingsoptimalisatie',
+            'headings': 'Koppen',
+            'links': 'Links',
+            'content_quality': 'Content Kwaliteit',
+            'word_count': 'Aantal Woorden',
+            'paragraphs': 'Paragrafen',
+            'has_structured_data': 'Bevat Gestructureerde Gegevens',
+
+            # Search Console Metrics
+            'clicks': 'Clicks',
+            'impressions': 'Impressies',
+            'ctr': 'Click Through Rate',
+            'position': 'Gemiddelde Positie',
+
+            # Priority Levels
             'high': 'Hoog',
             'medium': 'Gemiddeld',
             'low': 'Laag'
@@ -124,6 +139,9 @@ class DutchTranslator:
         """Get translation for a specific key"""
         return self.translations.get(key, key)
 
-    def get_description(self, key: str) -> str:
-        """Get description for a specific section"""
-        return self.section_descriptions.get(key, '')
+    def translate_dict(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Translate dictionary keys to Dutch"""
+        return {
+            self.translate(k): v 
+            for k, v in data.items()
+        }
