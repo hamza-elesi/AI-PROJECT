@@ -11,6 +11,14 @@ class DutchTranslator:
             'scraped_data': 'Opgehaalde Gegevens',
             'generated_by_seo_tool': 'Gegenereerd door SEO Analyse Tool',
 
+            # SEO Performance Overview
+            'website_seo_performance': 'Website SEO Prestaties',
+            'technical_seo_check': 'Technische SEO Controle',
+            'backlink_profile': 'Backlink Profiel',
+            'seo_recommendations': 'SEO Aanbevelingen',
+            'conclusion': 'Conclusie',
+            'next_steps': 'Volgende Stappen',
+
             # SEO Metrics
             'domain_authority': 'Domein Autoriteit',
             'page_authority': 'Pagina Autoriteit',
@@ -24,13 +32,14 @@ class DutchTranslator:
             'technical_seo': 'Technische SEO',
             'meta_tags': 'Meta Tags',
             'missing_meta': 'Ontbrekende Meta Tags',
-            'image_optimization': 'Afbeeldingsoptimalisatie',
+            'image_optimization': 'Afbeeldings optimalisatie',
             'headings': 'Koppen',
             'links': 'Links',
             'content_quality': 'Content Kwaliteit',
             'word_count': 'Aantal Woorden',
             'paragraphs': 'Paragrafen',
             'has_structured_data': 'Bevat Gestructureerde Gegevens',
+            'has_canonical': 'Canonical Tag Aanwezig',
 
             # Search Console Metrics
             'clicks': 'Clicks',
@@ -64,7 +73,11 @@ class DutchTranslator:
 
     def translate_dict(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Translate dictionary keys to Dutch"""
-        return {
-            self.translate(k): v 
-            for k, v in data.items()
-        }
+        translated_data = {}
+        for k, v in data.items():
+            translated_key = self.translate(k)
+            if isinstance(v, dict):  # Translate nested dictionaries
+                translated_data[translated_key] = self.translate_dict(v)
+            else:
+                translated_data[translated_key] = v
+        return translated_data
