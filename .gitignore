@@ -1,5 +1,6 @@
 # Virtual environment
 seo/
+venv/
 
 # Python cache and build files
 __pycache__/

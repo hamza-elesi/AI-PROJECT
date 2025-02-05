@@ -104,6 +104,8 @@ from src.api.rate_limiter import RateLimiter
 import os
 from dotenv import load_dotenv
 
+from streamlit.components.ai_insights import AIInsightsDisplay
+
 load_dotenv()
 
 class SEOApp:
@@ -160,98 +162,107 @@ class SEOApp:
         # Display analysis results if available
         if st.session_state.collected_data:
             self._display_results(st.session_state.collected_data)
-    def _display_results(self, data):
-            """Display analysis results with enhanced sections"""
-            # Overview Metrics
-            st.header("Overview Metrics")
-            MetricsDisplay.show_overview(data.get("overview", {}))
-
-            # Technical SEO Analysis
-            st.header("Technical SEO Analysis")
-            # Removed expander here since it's in the component
-            ReportDisplay.show_technical_analysis(data.get("scraped_data", {}))
-
-            # Content Analysis
-            st.header("Content Analysis")
-            # Removed expander here since it's in the component
-            ReportDisplay.show_content_analysis(data.get("scraped_data", {}))
-
-            # Backlink Analysis
-            st.header("Backlink Analysis")
-            # Removed expander here since it's in the component
-            ReportDisplay.show_backlink_analysis(data.get("moz_data", {}).get("metrics", {}))
-            backlink_details = data.get("moz_data", {}).get("backlink_details", {})
-            if backlink_details:
-                st.json(backlink_details)
-
-            # Report Generation
-            st.header("Report Generation")
-            col1, col2 = st.columns([1, 5])
-            
-            with col1:
-                if st.button("Generate Report", type="primary"):
-                    with st.spinner("Generating comprehensive report..."):
-                        pdf_report = self.report_generator.generate_report(data)
-                        st.session_state.pdf_ready = True
-                        st.session_state.pdf_data = pdf_report
-
-            # Download button
-            if st.session_state.pdf_ready:
-                with col2:
-                    st.download_button(
-                        label="Download PDF Report",
-                        data=st.session_state.pdf_data,
-                        file_name="seo_analysis_report.pdf",
-                        mime="application/pdf",
-                        help="Download the complete SEO analysis report in PDF format"
-                    )
-    
     # def _display_results(self, data):
-    #     """Display analysis results with enhanced sections"""
-    #     # Overview Metrics
-    #     st.header("Overview Metrics")
-    #     MetricsDisplay.show_overview(data.get("overview", {}))
+    #         """Display analysis results with enhanced sections"""
+    #         # Overview Metrics
+    #         st.header("Overview Metrics")
+    #         MetricsDisplay.show_overview(data.get("overview", {}))
 
-    #     # Technical SEO Analysis
-    #     st.header("Technical SEO Analysis")
-    #     with st.expander("View Technical Analysis", expanded=True):
+    #         # Technical SEO Analysis
+    #         st.header("Technical SEO Analysis")
+    #         # Removed expander here since it's in the component
     #         ReportDisplay.show_technical_analysis(data.get("scraped_data", {}))
 
-    #     # Content Analysis
-    #     st.header("Content Analysis")
-    #     with st.expander("View Content Analysis", expanded=True):
+    #         # Content Analysis
+    #         st.header("Content Analysis")
+    #         # Removed expander here since it's in the component
     #         ReportDisplay.show_content_analysis(data.get("scraped_data", {}))
 
-    #     # Backlink Analysis
-    #     st.header("Backlink Analysis")
-    #     with st.expander("View Backlink Analysis", expanded=True):
+    #         # Backlink Analysis
+    #         st.header("Backlink Analysis")
+    #         # Removed expander here since it's in the component
     #         ReportDisplay.show_backlink_analysis(data.get("moz_data", {}).get("metrics", {}))
     #         backlink_details = data.get("moz_data", {}).get("backlink_details", {})
     #         if backlink_details:
     #             st.json(backlink_details)
 
-    #     # Report Generation
-    #     st.header("Report Generation")
-    #     col1, col2 = st.columns([1, 5])
+    #         # Report Generation
+    #         st.header("Report Generation")
+    #         col1, col2 = st.columns([1, 5])
+            
+    #         with col1:
+    #             if st.button("Generate Report", type="primary"):
+    #                 with st.spinner("Generating comprehensive report..."):
+    #                     pdf_report = self.report_generator.generate_report(data)
+    #                     st.session_state.pdf_ready = True
+    #                     st.session_state.pdf_data = pdf_report
+
+    #         # Download button
+    #         if st.session_state.pdf_ready:
+    #             with col2:
+    #                 st.download_button(
+    #                     label="Download PDF Report",
+    #                     data=st.session_state.pdf_data,
+    #                     file_name="seo_analysis_report.pdf",
+    #                     mime="application/pdf",
+    #                     help="Download the complete SEO analysis report in PDF format"
+    #                 )
+    
+    # new fucntion aith ai ainsight
+    def _display_results(self, data):
+        """Display analysis results with AI insights"""
+        # Original metrics
+        MetricsDisplay.show_overview(data.get("overview", {}))
         
-    #     with col1:
-    #         if st.button("Generate Report", type="primary"):
-    #             with st.spinner("Generating comprehensive report..."):
-    #                 pdf_report = self.report_generator.generate_report(data)
-    #                 st.session_state.pdf_ready = True
-    #                 st.session_state.pdf_data = pdf_report
-
-    #     # Download button
-    #     if st.session_state.pdf_ready:
-    #         with col2:
-    #             st.download_button(
-    #                 label="Download PDF Report",
-    #                 data=st.session_state.pdf_data,
-    #                 file_name="seo_analysis_report.pdf",
-    #                 mime="application/pdf",
-    #                 help="Download the complete SEO analysis report in PDF format"
-    #             )
-
+        # Enhanced insights
+        enhanced_insights = data.get("enhanced_insights", {})
+        if enhanced_insights:
+            AIInsightsDisplay.show_enhanced_insights(enhanced_insights)
+            AIInsightsDisplay.show_strategic_insights(enhanced_insights)
+            
+            # Create tabs for detailed analysis
+            tab1, tab2, tab3 = st.tabs([
+                "Technical Analysis", 
+                "Content Analysis", 
+                "Priority Actions"
+            ])
+            
+            with tab1:
+                ReportDisplay.show_technical_analysis(
+                    data.get("scraped_data", {}),
+                    enhanced_insights.get("technical", [])
+                )
+            
+            with tab2:
+                ReportDisplay.show_content_analysis(
+                    data.get("scraped_data", {}),
+                    enhanced_insights.get("content", [])
+                )
+            
+            with tab3:
+                AIInsightsDisplay.show_priority_actions(enhanced_insights)
+            
+            # Show confidence metrics
+            AIInsightsDisplay.show_confidence_metrics(enhanced_insights)
+        
+        # Report generation
+        if st.button("Generate Enhanced Report"):
+            with st.spinner("Generating comprehensive report..."):
+                pdf_report = self.report_generator.generate_report(
+                    data, enhanced_insights
+                )
+                st.session_state.pdf_ready = True
+                st.session_state.pdf_data = pdf_report
+        
+        # Download button
+        if st.session_state.pdf_ready:
+            st.download_button(
+                label="Download PDF Report",
+                data=st.session_state.pdf_data,
+                file_name="enhanced_seo_report.pdf",
+                mime="application/pdf"
+            )
+    
 
 if __name__ == "__main__":
     rate_limiter = RateLimiter()

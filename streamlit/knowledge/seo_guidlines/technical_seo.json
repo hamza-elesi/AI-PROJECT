@@ -1,0 +1,101 @@
+{
+    "meta_tags": {
+        "title": {
+            "best_practices": [
+                "Keep titles between 50-60 characters",
+                "Include main keyword near the start",
+                "Make each title unique",
+                "Include brand name when possible"
+            ],
+            "impact": "high",
+            "recommendations": {
+                "too_short": "Title is too short. Add more descriptive content while keeping under 60 characters.",
+                "too_long": "Title exceeds 60 characters. Shorten it to prevent truncation in search results.",
+                "missing": "Missing title tag. Add a descriptive title that includes your main keyword."
+            }
+        },
+        "meta_description": {
+            "best_practices": [
+                "Keep descriptions between 150-160 characters",
+                "Include call-to-action",
+                "Use target keywords naturally",
+                "Make each description unique"
+            ],
+            "impact": "medium",
+            "recommendations": {
+                "too_short": "Description is too short. Aim for 150-160 characters to maximize SERP real estate.",
+                "too_long": "Description exceeds 160 characters. Shorten it to prevent truncation.",
+                "missing": "Missing meta description. Add a compelling description with a call-to-action."
+            }
+        },
+        "viewport": {
+            "best_practices": [
+                "Include viewport meta tag",
+                "Set appropriate initial scale",
+                "Enable responsive design"
+            ],
+            "impact": "high",
+            "recommendations": {
+                "missing": "Missing viewport meta tag. Add it to ensure proper mobile rendering.",
+                "incomplete": "Viewport tag present but missing key parameters. Update for better mobile optimization."
+            }
+        }
+    },
+    "headings": {
+        "h1": {
+            "best_practices": [
+                "One H1 per page",
+                "Include main keyword",
+                "Keep it descriptive",
+                "Match user intent"
+            ],
+            "impact": "high",
+            "recommendations": {
+                "missing": "No H1 tag found. Add a primary heading that describes your page content.",
+                "multiple": "Multiple H1 tags found. Use only one H1 per page.",
+                "too_long": "H1 is too long. Keep it concise while including your main keyword."
+            }
+        },
+        "heading_structure": {
+            "best_practices": [
+                "Use proper heading hierarchy",
+                "Include keywords naturally",
+                "Make headings descriptive",
+                "Keep structure logical"
+            ],
+            "impact": "medium",
+            "recommendations": {
+                "poor_hierarchy": "Improve heading structure. Use H2-H6 to create clear content hierarchy.",
+                "missing_subheadings": "Add more subheadings to break up content and improve readability."
+            }
+        }
+    },
+    "technical_elements": {
+        "canonical": {
+            "best_practices": [
+                "Use on duplicate content pages",
+                "Point to preferred version",
+                "Use absolute URLs",
+                "Implement correctly"
+            ],
+            "impact": "high",
+            "recommendations": {
+                "missing": "Missing canonical tag. Add it to prevent duplicate content issues.",
+                "incorrect": "Canonical tag present but may be incorrect. Verify it points to the preferred version."
+            }
+        },
+        "favicon": {
+            "best_practices": [
+                "Use appropriate size",
+                "Ensure high quality",
+                "Include multiple sizes",
+                "Use proper format"
+            ],
+            "impact": "low",
+            "recommendations": {
+                "missing": "Missing favicon. Add one to improve brand recognition and user experience.",
+                "low_quality": "Favicon present but low quality. Consider updating for better appearance."
+            }
+        }
+    }
+}

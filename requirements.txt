@@ -1,0 +1,32 @@
+# requirements.txt
+crawl4ai
+# Core dependencies
+reportlab
+streamlit
+python-dotenv
+beautifulsoup4
+aiohttp
+requests
+pytest
+pytest-asyncio
+
+# Testing
+pytest-mock
+
+# PDF Generation for reports
+fpdf2
+
+# Async support
+asyncio
+
+# Type hints support
+typing-extensions
+
+# Data handling
+pandas
+
+# HTML parsing
+lxml
+
+# URL handling
+urllib3

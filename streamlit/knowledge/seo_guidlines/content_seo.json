@@ -1,0 +1,45 @@
+{
+    "content_quality": {
+        "length": {
+            "best_practices": [
+                "Minimum 300 words for main pages",
+                "Comprehensive coverage of topic",
+                "Match content length to intent",
+                "Include relevant details"
+            ],
+            "impact": "high",
+            "recommendations": {
+                "too_short": "Content is too thin. Add more comprehensive information about the topic.",
+                "insufficient": "Content may not fully cover the topic. Consider expanding with more details."
+            }
+        },
+        "readability": {
+            "best_practices": [
+                "Use short paragraphs",
+                "Include bullet points",
+                "Write in active voice",
+                "Match audience level"
+            ],
+            "impact": "medium",
+            "recommendations": {
+                "poor_structure": "Improve content structure with shorter paragraphs and bullet points.",
+                "complex": "Content may be too complex. Simplify language for better readability."
+            }
+        }
+    },
+    "keywords": {
+        "usage": {
+            "best_practices": [
+                "Use keywords naturally",
+                "Include variations",
+                "Avoid keyword stuffing",
+                "Match user intent"
+            ],
+            "impact": "high",
+            "recommendations": {
+                "low_usage": "Keywords appear too infrequently. Include them more naturally in content.",
+                "stuffing": "Possible keyword stuffing detected. Make keyword usage more natural."
+            }
+        }
+    }
+}
