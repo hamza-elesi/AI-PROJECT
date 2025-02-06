@@ -96,7 +96,7 @@ import streamlit as st
 from components.metrics import MetricsDisplay
 from components.report import ReportDisplay
 from src.data.collector import DataCollector
-from src.reports.generator import ReportGenerator
+from src.reports.generator import EnhancedReportGenerator
 from src.api.moz_api import MozClient
 from src.scraper.web_scraper import SEOScraper
 from src.data.cache import DataCache
@@ -104,7 +104,7 @@ from src.api.rate_limiter import RateLimiter
 import os
 from dotenv import load_dotenv
 
-from streamlit.components.ai_insights import AIInsightsDisplay
+from components.ai_insights import AIInsightsDisplay
 
 load_dotenv()
 
@@ -162,6 +162,7 @@ class SEOApp:
         # Display analysis results if available
         if st.session_state.collected_data:
             self._display_results(st.session_state.collected_data)
+
     # def _display_results(self, data):
     #         """Display analysis results with enhanced sections"""
     #         # Overview Metrics
@@ -209,6 +210,7 @@ class SEOApp:
     #                 )
     
     # new fucntion aith ai ainsight
+    
     def _display_results(self, data):
         """Display analysis results with AI insights"""
         # Original metrics
@@ -273,7 +275,7 @@ if __name__ == "__main__":
     scraper = SEOScraper()
     cache = DataCache()
     data_collector = DataCollector(moz_client, scraper, cache)
-    report_generator = ReportGenerator()
+    report_generator = EnhancedReportGenerator()
 
     app = SEOApp(data_collector, report_generator)
     app.run()

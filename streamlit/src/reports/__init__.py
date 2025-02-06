@@ -1,4 +1,4 @@
-from .generator import ReportGenerator
+from .generator import EnhancedReportGenerator
 from .translations import DutchTranslator
 
-__all__ = ['ReportGenerator', 'DutchTranslator']
+__all__ = ['EnhancedReportGenerator', 'DutchTranslator']
