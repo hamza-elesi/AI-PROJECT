@@ -110,4 +110,3 @@ class SEOScraper:
             'has_favicon': bool(soup.find('link', {'rel': ['icon', 'shortcut icon']})),
             'has_viewport': bool(soup.find('meta', {'name': 'viewport'}))
         }
-

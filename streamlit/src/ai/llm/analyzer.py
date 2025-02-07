@@ -1,31 +1,33 @@
-# src/ai/llm/analyzer.py
-
 from typing import Dict, Any, List
 import openai
-from utils.token_counter import TokenCounter
-from utils.cost_optimizer import CostOptimizer
+import json
+import asyncio
+from src.utils.token_counter import TokenCounter
+from src.utils.cost_optimizer import CostOptimizer
 
 class LLMAnalyzer:
     """Handles selective LLM analysis of SEO data"""
-    
+
     def __init__(self):
         self.token_counter = TokenCounter()
         self.cost_optimizer = CostOptimizer()
-        self.model = "gpt-3.5-turbo"  # Default model for cost efficiency
+        self.model = "gpt-3.5-turbo"  # Using GPT-3.5 Turbo for cost efficiency
 
     async def analyze(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Selectively analyze SEO data using LLM
-        Only processes complex patterns that need advanced analysis
+        Selectively analyze SEO data using LLM.
+        Only processes complex patterns that need advanced analysis.
         """
-        analysis_needed = self.cost_optimizer.should_analyze(data)
-        if not analysis_needed:
+        if not self.cost_optimizer.should_use_llm(data):
+            print("⚠️ LLM analysis skipped due to low complexity or quota limits.")
             return {'type': 'basic', 'insights': []}
 
         try:
             technical_insights = await self._analyze_technical_seo(data.get('technical_seo', {}))
             content_insights = await self._analyze_content(data.get('scraped_data', {}))
             strategy_insights = await self._generate_strategy(data)
+
+            print("✅ LLM Analysis Completed Successfully!")
 
             return {
                 'type': 'enhanced',
@@ -34,6 +36,7 @@ class LLMAnalyzer:
                 'strategy_recommendations': strategy_insights
             }
         except Exception as e:
+            print(f"❌ LLM Analysis Error: {e}")
             return {'error': str(e), 'type': 'basic', 'insights': []}
 
     async def _analyze_technical_seo(self, technical_data: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -88,7 +91,8 @@ class LLMAnalyzer:
     async def _get_llm_response(self, prompt: str) -> str:
         """Get response from OpenAI API"""
         try:
-            response = await openai.ChatCompletion.create(
+            print("🔄 Sending request to OpenAI API...")
+            response = await openai.ChatCompletion.acreate(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": "You are an expert SEO analyst."},
@@ -97,21 +101,39 @@ class LLMAnalyzer:
                 temperature=0.7,
                 max_tokens=500
             )
-            return response.choices[0].message.content
+            output = response["choices"][0]["message"]["content"]
+            print("✅ LLM Response Received!")
+            return output
         except Exception as e:
-            raise Exception(f"LLM API error: {str(e)}")
+            print(f"❌ LLM API Error: {str(e)}")
+            return ""
 
     def _parse_technical_response(self, response: str) -> List[Dict[str, Any]]:
         """Parse technical analysis response"""
-        # Implement parsing logic
-        pass
+        try:
+            parsed_data = json.loads(response)
+            if isinstance(parsed_data, list):
+                return parsed_data
+        except Exception as e:
+            print(f"❌ Error parsing technical LLM response: {e}")
+        return []
 
     def _parse_content_response(self, response: str) -> List[Dict[str, Any]]:
         """Parse content analysis response"""
-        # Implement parsing logic
-        pass
+        try:
+            parsed_data = json.loads(response)
+            if isinstance(parsed_data, list):
+                return parsed_data
+        except Exception as e:
+            print(f"❌ Error parsing content LLM response: {e}")
+        return []
 
     def _parse_strategy_response(self, response: str) -> List[Dict[str, Any]]:
         """Parse strategy recommendations response"""
-        # Implement parsing logic
-        pass
+        try:
+            parsed_data = json.loads(response)
+            if isinstance(parsed_data, list):
+                return parsed_data
+        except Exception as e:
+            print(f"❌ Error parsing strategy LLM response: {e}")
+        return []

@@ -1,96 +1,3 @@
-# import asyncio
-# import streamlit as st
-# from components.metrics import MetricsDisplay
-# from components.report import ReportDisplay
-# from src.data.collector import DataCollector
-# from src.reports.generator import ReportGenerator
-# from src.api.moz_api import MozClient
-# from src.scraper.web_scraper import SEOScraper
-# from src.data.cache import DataCache
-# from src.api.rate_limiter import RateLimiter
-# import os
-# from dotenv import load_dotenv
-
-# load_dotenv()
-
-
-# class SEOApp:
-#     def __init__(self, data_collector, report_generator):
-#         self.data_collector = data_collector
-#         self.report_generator = report_generator
-
-#     def run(self):
-#         st.title("SEO Analysis Tool")
-
-#         # Initialize session state for URL and data
-#         if "url" not in st.session_state:
-#             st.session_state.url = ""
-#         if "collected_data" not in st.session_state:
-#             st.session_state.collected_data = None
-#         if "pdf_ready" not in st.session_state:
-#             st.session_state.pdf_ready = False
-
-#         # Input field for URL
-#         url = st.text_input(
-#             "Enter the website URL",
-#             placeholder="https://example.com",
-#             value=st.session_state.url,
-#             key="url_input",
-#         )
-
-#         # Analyze button
-#         if st.button("Analyze"):
-#             if url:
-#                 st.session_state.url = url
-#                 with st.spinner("Analyzing website..."):
-#                     try:
-#                         collected_data = asyncio.run(self.data_collector.collect_all_data(url))
-#                         st.session_state.collected_data = collected_data
-#                         st.session_state.pdf_ready = False
-#                     except Exception as e:
-#                         st.error(f"Error analyzing website: {str(e)}")
-#             else:
-#                 st.error("Please enter a valid URL!")
-
-#         # Display analysis results if available
-#         if st.session_state.collected_data:
-#             self._display_results(st.session_state.collected_data)
-
-#     def _display_results(self, data):
-#         """Display analysis results."""
-#         MetricsDisplay.show_overview(data.get("overview", {}))
-#         ReportDisplay.show_technical_analysis(data.get("scraped_data", {}))
-#         ReportDisplay.show_backlink_analysis(data.get("moz_data", {}).get("metrics", {}))
-
-#         # Generate PDF report
-#         if st.button("Generate Report"):
-#             pdf_report = self.report_generator.generate_pdf(data)
-#             st.session_state.pdf_ready = True
-#             st.session_state.pdf_data = pdf_report
-
-#         # Display download button after generating the report
-#         if st.session_state.pdf_ready:
-#             st.download_button(
-#                 label="Export PDF",
-#                 data=st.session_state.pdf_data,
-#                 file_name="seo_analysis_report.pdf",
-#                 mime="application/pdf",
-#             )
-
-
-# if __name__ == "__main__":
-#     rate_limiter = RateLimiter()
-#     moz_client = MozClient(api_token=os.getenv("MOZ_TOKEN"), rate_limiter=rate_limiter)
-#     scraper = SEOScraper()
-#     cache = DataCache()
-#     data_collector = DataCollector(moz_client, scraper, cache)
-
-#     # Use the translation-enabled report generator
-#     report_generator = ReportGenerator()
-
-#     app = SEOApp(data_collector, report_generator)
-#     app.run()
-
 import asyncio
 import streamlit as st
 from components.metrics import MetricsDisplay
@@ -101,10 +8,9 @@ from src.api.moz_api import MozClient
 from src.scraper.web_scraper import SEOScraper
 from src.data.cache import DataCache
 from src.api.rate_limiter import RateLimiter
+from src.ai.insights.generator import AIInsightsGenerator
 import os
 from dotenv import load_dotenv
-
-from components.ai_insights import AIInsightsDisplay
 
 load_dotenv()
 
@@ -112,28 +18,28 @@ class SEOApp:
     def __init__(self, data_collector, report_generator):
         self.data_collector = data_collector
         self.report_generator = report_generator
-        self.setup_page()
+        self.ai_generator = AIInsightsGenerator()
 
-    def setup_page(self):
-        st.set_page_config(
-            page_title="SEO Analyse Tool",
-            page_icon="📊",
-            layout="wide",
-            initial_sidebar_state="expanded"
-        )
+    async def analyze_website(self, url):
+        """Runs SEO analysis asynchronously."""
+        collected_data = await self.data_collector.collect_all_data(url)
+        enhanced_insights = await self.ai_generator.generate_insights(collected_data)
+
+        # ✅ Debugging AI Insights and Backlink Data
+        print("🟢 MOZ Data (Backlink Check):", collected_data.get("moz_data", {}))
+        print("🟢 AI Insights Generated:", enhanced_insights)
+
+        return collected_data, enhanced_insights
 
     def run(self):
-        st.title("SEO Analysis Tool")
+        st.title("🔎 SEO Analysis Tool")
 
-        # Initialize session state
-        if "url" not in st.session_state:
-            st.session_state.url = ""
-        if "collected_data" not in st.session_state:
-            st.session_state.collected_data = None
-        if "pdf_ready" not in st.session_state:
-            st.session_state.pdf_ready = False
+        # ✅ Initialize session state variables
+        for key in ["url", "collected_data", "enhanced_insights", "pdf_ready", "pdf_data"]:
+            if key not in st.session_state:
+                st.session_state[key] = None  # Ensures safe access
 
-        # Input field for URL
+        # 🔹 Input field for URL
         url = st.text_input(
             "Enter the website URL",
             placeholder="https://example.com",
@@ -141,137 +47,112 @@ class SEOApp:
             key="url_input",
         )
 
-        # Create columns for buttons
-        col1, col2 = st.columns([1, 5])
+        # 🔹 Analyze button
+        if st.button("Analyze"):
+            if url:
+                st.session_state.url = url
+                with st.spinner("Analyzing website..."):
+                    try:
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        collected_data, enhanced_insights = loop.run_until_complete(
+                            self.analyze_website(url)
+                        )
 
-        # Analyze button
-        with col1:
-            if st.button("Analyze", type="primary"):
-                if url:
-                    st.session_state.url = url
-                    with st.spinner("Analyzing website..."):
-                        try:
-                            collected_data = asyncio.run(self.data_collector.collect_all_data(url))
-                            st.session_state.collected_data = collected_data
-                            st.session_state.pdf_ready = False
-                        except Exception as e:
-                            st.error(f"Error analyzing website: {str(e)}")
-                else:
-                    st.error("Please enter a valid URL!")
+                        # ✅ Store data in session state
+                        st.session_state.collected_data = collected_data
+                        st.session_state.enhanced_insights = enhanced_insights
+                        st.session_state.pdf_ready = False
+                        st.success("✅ Website analyzed successfully!")
 
-        # Display analysis results if available
-        if st.session_state.collected_data:
-            self._display_results(st.session_state.collected_data)
+                    except Exception as e:
+                        st.error(f"❌ Error analyzing website: {str(e)}")
+            else:
+                st.error("⚠️ Please enter a valid URL!")
 
-    # def _display_results(self, data):
-    #         """Display analysis results with enhanced sections"""
-    #         # Overview Metrics
-    #         st.header("Overview Metrics")
-    #         MetricsDisplay.show_overview(data.get("overview", {}))
-
-    #         # Technical SEO Analysis
-    #         st.header("Technical SEO Analysis")
-    #         # Removed expander here since it's in the component
-    #         ReportDisplay.show_technical_analysis(data.get("scraped_data", {}))
-
-    #         # Content Analysis
-    #         st.header("Content Analysis")
-    #         # Removed expander here since it's in the component
-    #         ReportDisplay.show_content_analysis(data.get("scraped_data", {}))
-
-    #         # Backlink Analysis
-    #         st.header("Backlink Analysis")
-    #         # Removed expander here since it's in the component
-    #         ReportDisplay.show_backlink_analysis(data.get("moz_data", {}).get("metrics", {}))
-    #         backlink_details = data.get("moz_data", {}).get("backlink_details", {})
-    #         if backlink_details:
-    #             st.json(backlink_details)
-
-    #         # Report Generation
-    #         st.header("Report Generation")
-    #         col1, col2 = st.columns([1, 5])
-            
-    #         with col1:
-    #             if st.button("Generate Report", type="primary"):
-    #                 with st.spinner("Generating comprehensive report..."):
-    #                     pdf_report = self.report_generator.generate_report(data)
-    #                     st.session_state.pdf_ready = True
-    #                     st.session_state.pdf_data = pdf_report
-
-    #         # Download button
-    #         if st.session_state.pdf_ready:
-    #             with col2:
-    #                 st.download_button(
-    #                     label="Download PDF Report",
-    #                     data=st.session_state.pdf_data,
-    #                     file_name="seo_analysis_report.pdf",
-    #                     mime="application/pdf",
-    #                     help="Download the complete SEO analysis report in PDF format"
-    #                 )
-    
-    # new fucntion aith ai ainsight
-    
-    def _display_results(self, data):
-        """Display analysis results with AI insights"""
-        # Original metrics
-        MetricsDisplay.show_overview(data.get("overview", {}))
-        
-        # Enhanced insights
-        enhanced_insights = data.get("enhanced_insights", {})
-        if enhanced_insights:
-            AIInsightsDisplay.show_enhanced_insights(enhanced_insights)
-            AIInsightsDisplay.show_strategic_insights(enhanced_insights)
-            
-            # Create tabs for detailed analysis
-            tab1, tab2, tab3 = st.tabs([
-                "Technical Analysis", 
-                "Content Analysis", 
-                "Priority Actions"
-            ])
-            
-            with tab1:
-                ReportDisplay.show_technical_analysis(
-                    data.get("scraped_data", {}),
-                    enhanced_insights.get("technical", [])
-                )
-            
-            with tab2:
-                ReportDisplay.show_content_analysis(
-                    data.get("scraped_data", {}),
-                    enhanced_insights.get("content", [])
-                )
-            
-            with tab3:
-                AIInsightsDisplay.show_priority_actions(enhanced_insights)
-            
-            # Show confidence metrics
-            AIInsightsDisplay.show_confidence_metrics(enhanced_insights)
-        
-        # Report generation
-        if st.button("Generate Enhanced Report"):
-            with st.spinner("Generating comprehensive report..."):
-                pdf_report = self.report_generator.generate_report(
-                    data, enhanced_insights
-                )
-                st.session_state.pdf_ready = True
-                st.session_state.pdf_data = pdf_report
-        
-        # Download button
-        if st.session_state.pdf_ready:
-            st.download_button(
-                label="Download PDF Report",
-                data=st.session_state.pdf_data,
-                file_name="enhanced_seo_report.pdf",
-                mime="application/pdf"
+        # 🔹 Display analysis results
+        if st.session_state.collected_data and st.session_state.enhanced_insights:
+            self._display_results(
+                st.session_state.collected_data, st.session_state.enhanced_insights
             )
-    
+
+    def _display_results(self, data, enhanced_insights):
+        """Display analysis results."""
+
+        # 🔹 SEO Metrics Overview
+        st.subheader("📊 SEO Metrics Overview")
+        MetricsDisplay.show_overview(data.get("overview", {}))
+
+        # 🔹 Technical SEO Analysis
+        st.subheader("🛠️ Technical SEO Analysis")
+        ReportDisplay.show_technical_analysis(data.get("scraped_data", {}))
+
+        # 🔹 AI-Generated Technical Insights
+        technical_insights = enhanced_insights.get("technical_insights", [])
+        if technical_insights:
+            st.subheader("🤖 AI-Generated Technical Insights")
+            for insight in technical_insights:
+                st.write(f"**{insight.get('recommendation', 'No Title')}**")
+        else:
+            st.write("⚠️ No AI-generated technical insights available.")
+
+        # 🔹 Backlink Analysis
+        st.subheader("🔗 Backlink Analysis")
+        ReportDisplay.show_backlink_analysis(data.get("moz_data", {}).get("metrics", {}))
+
+        # 🔹 AI-Generated Backlink Insights
+        backlink_insights = enhanced_insights.get("backlink_insights", [])
+        if backlink_insights:
+            st.subheader("📡 AI-Generated Backlink Insights")
+            for insight in backlink_insights:
+                st.write(f"**{insight.get('recommendation', 'No Title')}**")
+        else:
+            st.write("⚠️ No AI-enhanced backlink insights available.")
+
+        # 🔹 AI-Generated Strategic Recommendations
+        st.subheader("🧠 AI-Generated Strategic Recommendations")
+        strategic_insights = enhanced_insights.get("strategic_recommendations", [])
+        if strategic_insights:
+            for insight in strategic_insights:
+                st.write(f"**{insight.get('recommendation', 'No Title')}**")
+        else:
+            st.write("⚠️ No AI-generated strategic recommendations available.")
+
+        # 🔹 AI-Generated Priority Actions
+        st.subheader("🔥 AI-Generated Priority Actions")
+        priority_actions = enhanced_insights.get("priority_actions", [])
+        if priority_actions:
+            for action in priority_actions:
+                st.write(f"**{action.get('recommendation', 'No Title')}**")
+        else:
+            st.write("⚠️ No AI-generated priority actions available.")
+
+        # 🔹 Generate PDF Report
+        if st.button("📄 Generate Report"):
+            with st.spinner("Generating report..."):
+                try:
+                    pdf_report = self.report_generator.generate_report(data, enhanced_insights)
+                    pdf_bytes = bytes(pdf_report) if isinstance(pdf_report, bytearray) else pdf_report
+
+                    # ✅ Store report data
+                    st.session_state.pdf_ready = True
+                    st.session_state.pdf_data = pdf_bytes
+                    st.success("✅ Report generated successfully!")
+                except Exception as e:
+                    st.error(f"❌ Error generating report: {str(e)}")
+
+        # 🔹 Download PDF Report
+        if st.session_state.pdf_ready and st.session_state.pdf_data:
+            st.download_button(
+                label="📥 Download PDF Report",
+                data=st.session_state.pdf_data,
+                file_name="seo_analysis_report.pdf",
+                mime="application/pdf",
+            )
 
 if __name__ == "__main__":
     rate_limiter = RateLimiter()
-    moz_client = MozClient(
-        api_token=os.getenv("MOZ_TOKEN"),
-        rate_limiter=rate_limiter
-    )
+    moz_client = MozClient(api_token=os.getenv("MOZ_TOKEN"), rate_limiter=rate_limiter)
     scraper = SEOScraper()
     cache = DataCache()
     data_collector = DataCollector(moz_client, scraper, cache)
