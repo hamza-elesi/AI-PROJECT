@@ -68,22 +68,35 @@ class AIInsightsGenerator:
         return {
             'technical_insights': self._merge_insights(
                 rag_insights.get('technical_insights', []),
-                self._convert_to_list(llm_insights.get('technical_insights', []))
+                self._convert_to_list(llm_insights.get('technical_insights'))
             ),
             'content_insights': self._merge_insights(
                 rag_insights.get('content_insights', []),
-                self._convert_to_list(llm_insights.get('content_insights', []))
+                self._convert_to_list(llm_insights.get('content_insights'))
             ),
             'backlink_insights': self._merge_insights(
                 rag_insights.get('backlink_insights', []),
-                self._convert_to_list(llm_insights.get('backlink_insights', []))
+                self._convert_to_list(llm_insights.get('backlink_insights'))
             ),
             'strategic_recommendations': self._merge_strategy_insights(
                 rag_insights.get('similar_cases', []),
-                self._convert_to_list(llm_insights.get('strategy_recommendations', []))
+                self._convert_to_list(llm_insights.get('strategy_recommendations'))
             ),
             'priority_actions': self._generate_priority_actions(data, rag_insights, llm_insights)
         }
+
+    def _convert_to_list(self, data: Any) -> List[Dict]:
+        """Ensure insights are always in list format to prevent type errors."""
+        if isinstance(data, dict):
+            return sum(data.values(), []) if all(isinstance(v, list) for v in data.values()) else list(data.values())
+        elif isinstance(data, list):
+            return data
+        return []
+
+
+
+
+
 
     def _merge_insights(self, rag_insights: List[Dict], llm_insights: List[Dict]) -> List[Dict]:
         """Merge and deduplicate insights."""
@@ -101,6 +114,15 @@ class AIInsightsGenerator:
                     seen_recommendations.add(key)
 
         return sorted(merged, key=lambda x: x.get('confidence', 0), reverse=True)
+
+    def _calculate_confidence(self, insight: Dict[str, Any]) -> float:
+        """Calculate confidence score for an insight."""
+        base_confidence = insight.get('confidence', 0.5)
+        impact = insight.get('impact', 0.5)
+        evidence = 1 if insight.get('evidence') else 0.6
+        
+        return (base_confidence + impact + evidence) / 3    
+    
 
     def _merge_strategy_insights(self, similar_cases: List[Dict], llm_recommendations: List[Dict]) -> List[Dict]:
         """Generate strategic insights based on similar cases and LLM recommendations."""
@@ -126,15 +148,6 @@ class AIInsightsGenerator:
 
         return sorted(strategic_insights, key=lambda x: x['confidence'], reverse=True)
 
-    def _generate_priority_actions(self, data: Dict[str, Any], rag_insights: Dict[str, Any], llm_insights: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Generate prioritized action items."""
-        all_insights = self._get_priority_insights(rag_insights) + self._get_priority_insights(llm_insights)
-
-        if not all_insights:
-            return self._generate_basic_priority_actions(data)
-
-        return sorted(all_insights, key=lambda x: (x.get('impact', 0) * x.get('confidence', 0)), reverse=True)[:5]
-
     def _get_priority_insights(self, insights: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Extract priority insights from a set of insights."""
         priority_insights = []
@@ -146,14 +159,34 @@ class AIInsightsGenerator:
 
         return priority_insights
 
+    def _generate_priority_actions(self, data: Dict[str, Any], rag_insights: Dict[str, Any], llm_insights: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Generate prioritized action items."""
+        all_insights = self._get_priority_insights(rag_insights) + self._get_priority_insights(llm_insights)
+
+        if not all_insights:
+            return self._generate_basic_priority_actions(data)
+
+        return sorted(all_insights, key=lambda x: (x.get('impact', 0) * x.get('confidence', 0)), reverse=True)[:5]
+
+    def _generate_basic_priority_actions(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Generate basic priority actions without AI processing."""
+        return sorted(
+            self._basic_technical_insights(data) +
+            self._basic_content_insights(data) +
+            self._basic_backlink_insights(data),
+            key=lambda x: x.get('impact', 0),
+            reverse=True
+        )[:3]
+    
     def _generate_basic_insights(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Generate fallback basic insights when AI fails."""
         return {
             'technical_insights': self._basic_technical_insights(data),
             'content_insights': self._basic_content_insights(data),
             'backlink_insights': self._basic_backlink_insights(data),
-            'priority_actions': self._generate_priority_actions(data, {}, {})
+            'priority_actions': self._generate_basic_priority_actions(data)
         }
+    
 
     def _basic_technical_insights(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Fallback technical SEO insights."""
