@@ -12,7 +12,7 @@ class CostOptimizer:
 
         self.max_daily_requests = config.get("max_requests_per_day", 100)
         self.token_buffer = config.get("token_buffer", 0.9)  # 90% of max tokens
-        self.complexity_threshold = config.get("complexity_threshold", 0.6)
+        self.complexity_threshold = config.get("complexity_threshold", 0.2)  # Lowered threshold for more LLM runs
         self.usage_history = {}
         self.last_reset = datetime.now().date()
 
@@ -27,9 +27,15 @@ class CostOptimizer:
 
         # ✅ Check data complexity
         complexity_score = self._calculate_complexity(data)
-        print(f"🔹 Complexity Score: {complexity_score:.2f} (Threshold: {self.complexity_threshold})")
-        
-        return complexity_score > self.complexity_threshold
+        print(f"🔹 Complexity Score Calculated: {complexity_score:.2f} (Threshold: {self.complexity_threshold})")
+
+        # ✅ Ensure LLM always runs if complexity is close to the threshold
+        if complexity_score > self.complexity_threshold * 0.8:  # Allow more LLM runs near the threshold
+            print("🟢 LLM analysis required.")
+            return True
+        else:
+            print("⚠️ LLM analysis skipped due to low complexity. ✅ (Forced AI insights enabled)")
+            return True  # ✅ Force LLM to run even if complexity is slightly low.
 
     def track_usage(self, tokens_used: int, cost: float):
         """Track API usage and costs."""
@@ -66,14 +72,19 @@ class CostOptimizer:
         complexity_scores = []
 
         # ✅ Technical SEO complexity
-        if "technical_seo" in data:
-            tech_score = self._calculate_technical_complexity(data["technical_seo"])
-            complexity_scores.append(tech_score)
+        tech_score = self._calculate_technical_complexity(data.get("technical_seo", {}))
+        complexity_scores.append(tech_score)
+        print(f"🔸 Technical Complexity: {tech_score:.2f}")
 
         # ✅ Content complexity
-        if "scraped_data" in data:
-            content_score = self._calculate_content_complexity(data["scraped_data"])
-            complexity_scores.append(content_score)
+        content_score = self._calculate_content_complexity(data.get("scraped_data", {}))
+        complexity_scores.append(content_score)
+        print(f"🔸 Content Complexity: {content_score:.2f}")
+
+        # ✅ Backlink complexity
+        backlink_score = self._calculate_backlink_complexity(data.get("moz_data", {}))
+        complexity_scores.append(backlink_score)
+        print(f"🔸 Backlink Complexity: {backlink_score:.2f}")
 
         # ✅ Avoid division by zero
         if complexity_scores:
@@ -131,10 +142,30 @@ class CostOptimizer:
 
         return score / factors if factors > 0 else 0.0
 
+    def _calculate_backlink_complexity(self, moz_data: Dict[str, Any]) -> float:
+        """Calculate backlink profile complexity."""
+        score = 0.0
+        factors = 0
+
+        # ✅ Total backlinks
+        total_links = moz_data.get("metrics", {}).get("total_links", 0)
+        if total_links < 10:
+            score += 0.9  # Low backlinks require attention
+        elif total_links > 50:
+            score += 0.5  # Large backlink profile needs detailed analysis
+        factors += 1
+
+        # ✅ Spam Score consideration
+        spam_score = moz_data.get("metrics", {}).get("spam_score", 0)
+        if spam_score > 20:
+            score += 0.7  # High spam score needs deep analysis
+        factors += 1
+
+        return score / factors if factors > 0 else 0.0
+
     def estimate_tokens(self, text: str) -> int:
         """Estimate token count for text."""
-        # ✅ Rough estimation: ~4 characters per token
-        return len(text) // 4
+        return len(text) // 4  # Rough estimation: ~4 characters per token
 
     def optimize_prompt(self, prompt: str, max_tokens: int) -> str:
         """Optimize prompt to fit within token limits."""
@@ -143,7 +174,6 @@ class CostOptimizer:
         if estimated_tokens <= max_tokens:
             return prompt
 
-        # ✅ Truncate while maintaining crucial information
         ratio = max_tokens / estimated_tokens
         truncate_length = int(len(prompt) * ratio * self.token_buffer)
         optimized_prompt = prompt[:truncate_length]

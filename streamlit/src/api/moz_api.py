@@ -13,7 +13,6 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 class MozClient:
     def __init__(self, api_token: str, rate_limiter):
         """
@@ -61,18 +60,29 @@ class MozClient:
                     json=payload
                 ) as response:
                     if response.status != 200:
-                        logger.error("API returned status %s", response.status)
+                        logger.error("❌ API returned status %s", response.status)
                         return {'error': f"API returned status {response.status}"}
+                    
                     data = await response.json()
-                    return self._process_domain_metrics(data.get("result", {}))
+                    
+                    # ✅ Debugging: Check Moz API response
+                    print("🟢 MOZ API Raw Response:", data)
+                    
+                    processed_data = self._process_domain_metrics(data.get("result", {}))
+                    
+                    # ✅ Debugging: Verify processed backlink data
+                    print("🟢 Processed Backlink Data:", processed_data)
+                    
+                    return processed_data
+
             except aiohttp.ClientError as e:
-                logger.error("Network error: %s", str(e))
+                logger.error("❌ Network error: %s", str(e))
                 return {'error': 'Network error'}
             except asyncio.TimeoutError:
-                logger.error("Request timed out")
+                logger.error("❌ Request timed out")
                 return {'error': 'Request timed out'}
             except Exception as e:
-                logger.error("Error fetching domain metrics: %s", str(e))
+                logger.error("❌ Error fetching domain metrics: %s", str(e))
                 return {'error': str(e)}
 
     def _process_domain_metrics(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -82,6 +92,8 @@ class MozClient:
         :return: A dictionary with structured domain metrics.
         """
         site_metrics = data.get("site_metrics", {})
+        backlinks = site_metrics.get("root_domains_to_root_domain", 0)  # Ensure correct extraction
+
         return {
             'domain_authority': site_metrics.get('domain_authority', 0),
             'page_authority': site_metrics.get('page_authority', 0),
@@ -89,5 +101,5 @@ class MozClient:
             'total_links': site_metrics.get('pages_to_root_domain', 0),
             'spam_score': site_metrics.get('spam_score', 0),
             'last_crawled': site_metrics.get('last_crawled', 'N/A'),
+            'backlinks': backlinks  # Store backlinks properly
         }
-

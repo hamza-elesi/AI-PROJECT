@@ -3,7 +3,7 @@ from typing import Dict, Any, List
 
 class ReportDisplay:
     """Component for displaying SEO reports"""
-    
+
     @staticmethod
     def show_overview_metrics(data: Dict[str, Any]):
         st.subheader("SEO-Metrics & Overzicht")
@@ -27,7 +27,7 @@ class ReportDisplay:
                 label="Aantal Backlinks",
                 value=data.get('backlinks', 0)
             )
-    
+
     @staticmethod
     def show_technical_analysis(data: Dict[str, Any], enhanced_insights: List[Dict[str, Any]] = None):
         """Display technical SEO analysis with enhanced insights"""
@@ -81,7 +81,7 @@ class ReportDisplay:
                         st.markdown("#### Implementation Steps")
                         for step in insight['implementation_steps']:
                             st.markdown(f"- {step}")
-    
+
     @staticmethod
     def show_content_analysis(data: Dict[str, Any], enhanced_insights: List[Dict] = None):
         """Display content analysis with optional enhanced insights"""
@@ -110,22 +110,43 @@ class ReportDisplay:
                         st.metric("Impact", f"{insight.get('impact', 0)*100:.0f}%")
                     with cols[2]:
                         st.metric("Confidence", f"{insight.get('confidence', 0)*100:.0f}%")
+
     @staticmethod
-    def show_backlink_analysis(data: Dict[str, Any]):
-        with st.expander("Backlink Analyse", expanded=True):
-            st.markdown("### Backlink Profiel")
-            
-            # Backlink metrics
-            if 'backlinks' in data:
-                st.table(data['backlinks'])
+    def show_backlink_analysis(data: Dict[str, Any], backlink_insights: List[Dict[str, Any]] = None):
+        """Display backlink analysis with Moz API data and AI insights."""
+        st.subheader("🔗 Backlink Analysis")
+
+        if not data:
+            st.write("⚠️ No backlink data available.")
+            return
+
+        # Show backlink metrics
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Linking Domains", data.get('linking_domains', 0))
+        with col2:
+            st.metric("Total Links", data.get('total_links', 0))
+
+        # Show detailed Moz API backlink data without redundant titles
+        with st.expander("Detailed Backlink Data"):
+            st.json(data)
+
+        # Display AI-Generated Backlink Insights if available
+        if backlink_insights:
+            st.subheader("📡 AI-Generated Backlink Insights")
+            for insight in backlink_insights:
+                with st.expander(insight.get("recommendation", "No Title")):
+                    st.write(insight.get("description", "No Description"))
+        else:
+            st.write("⚠️ No AI-enhanced backlink insights available.")
 
     @staticmethod
     def show_recommendations(recommendations: List[Dict[str, Any]]):
-        with st.expander("SEO Aanbevelingen & Kosten", expanded=True):
+        with st.expander("SEO Recommendations & Costs", expanded=True):
             for rec in recommendations:
                 st.markdown(f"""
                 **{rec['task']}**
-                - Prioriteit: {rec['priority']}
-                - Tijd: {rec['time']}
-                - Kosten: {rec['cost']}
+                - Priority: {rec['priority']}
+                - Time: {rec['time']}
+                - Cost: {rec['cost']}
                 """)

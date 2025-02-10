@@ -12,6 +12,7 @@ from src.ai.insights.generator import AIInsightsGenerator
 import os
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 
 class SEOApp:
@@ -25,19 +26,20 @@ class SEOApp:
         collected_data = await self.data_collector.collect_all_data(url)
         enhanced_insights = await self.ai_generator.generate_insights(collected_data)
 
-        # ✅ Debugging AI Insights and Backlink Data
+        # ✅ Debugging: Ensure Data is Collected
         print("🟢 MOZ Data (Backlink Check):", collected_data.get("moz_data", {}))
         print("🟢 AI Insights Generated:", enhanced_insights)
 
         return collected_data, enhanced_insights
 
     def run(self):
+        """Run the Streamlit SEO analysis tool."""
         st.title("🔎 SEO Analysis Tool")
 
-        # ✅ Initialize session state variables
+        # ✅ Initialize session state variables safely
         for key in ["url", "collected_data", "enhanced_insights", "pdf_ready", "pdf_data"]:
             if key not in st.session_state:
-                st.session_state[key] = None  # Ensures safe access
+                st.session_state[key] = None  
 
         # 🔹 Input field for URL
         url = st.text_input(
@@ -51,13 +53,9 @@ class SEOApp:
         if st.button("Analyze"):
             if url:
                 st.session_state.url = url
-                with st.spinner("Analyzing website..."):
+                with st.spinner("🔄 Analyzing website..."):
                     try:
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
-                        collected_data, enhanced_insights = loop.run_until_complete(
-                            self.analyze_website(url)
-                        )
+                        collected_data, enhanced_insights = asyncio.run(self.analyze_website(url))  # ✅ FIX: Use asyncio.run() to avoid conflicts
 
                         # ✅ Store data in session state
                         st.session_state.collected_data = collected_data
@@ -77,7 +75,7 @@ class SEOApp:
             )
 
     def _display_results(self, data, enhanced_insights):
-        """Display analysis results."""
+        """Display analysis results in Streamlit."""
 
         # 🔹 SEO Metrics Overview
         st.subheader("📊 SEO Metrics Overview")
@@ -96,11 +94,12 @@ class SEOApp:
         else:
             st.write("⚠️ No AI-generated technical insights available.")
 
-        # 🔹 Backlink Analysis
-        st.subheader("🔗 Backlink Analysis")
-        ReportDisplay.show_backlink_analysis(data.get("moz_data", {}).get("metrics", {}))
+        # 🔹 Backlink Analysis (Fixed - Removed Duplicate)
+        if "moz_data" in data and "metrics" in data["moz_data"]:
+            st.subheader("🔗 Backlink Analysis")
+            ReportDisplay.show_backlink_analysis(data["moz_data"]["metrics"])
 
-        # 🔹 AI-Generated Backlink Insights
+        # 🔹 AI-Generated Backlink Insights (Ensured to Show Properly)
         backlink_insights = enhanced_insights.get("backlink_insights", [])
         if backlink_insights:
             st.subheader("📡 AI-Generated Backlink Insights")
