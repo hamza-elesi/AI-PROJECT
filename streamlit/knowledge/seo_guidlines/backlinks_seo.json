@@ -1,0 +1,107 @@
+{
+    "backlink_quality": {
+        "domain_authority": {
+            "best_practices": [
+                "Focus on acquiring links from domains with DA > 40",
+                "Prioritize relevant industry authority sites",
+                "Monitor DA trends of linking domains",
+                "Diversify DA ranges across backlink profile"
+            ],
+            "impact": "high",
+            "recommendations": {
+                "low_da": "Focus on acquiring backlinks from higher authority domains (DA > 40) to improve overall link quality.",
+                "da_improvement": "Current domain authority profile shows room for improvement. Target authoritative industry websites.",
+                "excellent_da": "Maintain strong domain authority profile by continuing to acquire high-quality backlinks."
+            }
+        },
+        "link_relevance": {
+            "best_practices": [
+                "Ensure linking pages are topically relevant",
+                "Seek links from industry-specific websites",
+                "Prioritize contextual links within content",
+                "Focus on thematic relationship between sites"
+            ],
+            "impact": "high",
+            "recommendations": {
+                "low_relevance": "Improve backlink relevance by targeting industry-specific websites and relevant content pages.",
+                "medium_relevance": "Enhance topical authority by focusing on more closely related industry websites.",
+                "good_relevance": "Maintain strong topical relevance in backlink acquisition strategy."
+            }
+        }
+    },
+    "backlink_diversity": {
+        "link_types": {
+            "best_practices": [
+                "Mix of dofollow and nofollow links",
+                "Variety of anchor text types",
+                "Different link placement contexts",
+                "Multiple page types as link sources"
+            ],
+            "impact": "medium",
+            "recommendations": {
+                "low_diversity": "Diversify link types by acquiring links from different sources and contexts.",
+                "overoptimized": "Reduce over-optimization by varying anchor text and link contexts.",
+                "good_mix": "Maintain healthy mix of different link types and contexts."
+            }
+        },
+        "link_sources": {
+            "best_practices": [
+                "Varied source websites",
+                "Mix of different TLDs",
+                "Geographic diversity when relevant",
+                "Different website categories"
+            ],
+            "impact": "medium",
+            "recommendations": {
+                "limited_sources": "Expand link sources to include more diverse website types and categories.",
+                "good_variation": "Continue maintaining diverse link sources while focusing on quality."
+            }
+        }
+    },
+    "link_growth": {
+        "acquisition_rate": {
+            "best_practices": [
+                "Steady, natural link growth",
+                "Consistent acquisition over time",
+                "Avoid sudden spikes in links",
+                "Regular monitoring of link gains/losses"
+            ],
+            "impact": "high",
+            "recommendations": {
+                "slow_growth": "Implement more active link building strategies while maintaining natural growth patterns.",
+                "unnatural_pattern": "Adjust link acquisition rate to appear more natural and steady.",
+                "healthy_growth": "Maintain current organic link growth pattern."
+            }
+        },
+        "link_velocity": {
+            "best_practices": [
+                "Monitor monthly link acquisition rate",
+                "Track link loss versus gain",
+                "Maintain industry-appropriate velocity",
+                "Adjust strategy based on competitors"
+            ],
+            "impact": "medium",
+            "recommendations": {
+                "low_velocity": "Increase link building efforts while maintaining natural acquisition patterns.",
+                "high_velocity": "Moderate link acquisition rate to maintain natural growth pattern.",
+                "optimal_velocity": "Continue current link acquisition strategy."
+            }
+        }
+    },
+    "spam_detection": {
+        "quality_signals": {
+            "best_practices": [
+                "Monitor spam score of linking domains",
+                "Check for PBN connections",
+                "Evaluate link neighborhood quality",
+                "Assess overall link profile health"
+            ],
+            "impact": "high",
+            "recommendations": {
+                "high_spam": "Take immediate action to disavow low-quality links and improve overall profile quality.",
+                "moderate_spam": "Review and disavow suspicious links while focusing on quality acquisition.",
+                "low_spam": "Maintain current quality control measures in link acquisition."
+            }
+        }
+    }
+}

@@ -1,6 +1,8 @@
 # requirements.txt
 crawl4ai
 # Core dependencies
+openai
+chromadb
 reportlab
 streamlit
 python-dotenv

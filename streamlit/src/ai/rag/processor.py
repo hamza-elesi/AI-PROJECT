@@ -13,11 +13,20 @@ class RAGProcessor:
     async def process(self, seo_data: Dict[str, Any]) -> Dict[str, Any]:
         """Process SEO data and generate enhanced insights."""
         print("🟢 Starting RAG Processing...")
+        print("\n=== Starting RAG Processing Debug ===")
+        
+        technical_data = seo_data.get('technical_seo', {}).get('metrics', {})
+        content_data = seo_data.get('content_data', {}).get('metrics', {})
+        backlink_data = seo_data.get('backlink_data', {}).get('metrics', {}) 
 
         # Get relevant insights
-        technical_insights = await self._analyze_technical(seo_data.get('technical_seo', {}))
-        content_insights = await self._analyze_content(seo_data.get('scraped_data', {}))
-        backlink_insights = await self._analyze_backlinks(seo_data.get('moz_data', {}))
+        # Get relevant insights with structured data
+        technical_insights = await self._analyze_technical(technical_data)
+        content_insights = await self._analyze_content(content_data)
+        backlink_insights = await self._analyze_backlinks(backlink_data)
+        # technical_insights = await self._analyze_technical(seo_data.get('technical_seo', {}))
+        # content_insights = await self._analyze_content(seo_data.get('scraped_data', {}))
+        # backlink_insights = await self._analyze_backlinks(seo_data.get('moz_data', {}))
 
         # Debugging: Check if insights are being generated
         print(f"🔹 Technical Insights: {technical_insights}")
