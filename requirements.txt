@@ -2,7 +2,7 @@
 crawl4ai
 # Core dependencies
 openai
-chromadb
+chromadb==0.6.3
 reportlab
 streamlit
 python-dotenv
@@ -11,7 +11,7 @@ aiohttp
 requests
 pytest
 pytest-asyncio
-sqlite3 >= 3.35.0
+pysqlite3-binary>=3.35.0
 # Testing
 pytest-mock
 
