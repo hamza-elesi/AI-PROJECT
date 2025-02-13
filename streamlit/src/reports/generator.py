@@ -117,6 +117,6 @@ class EnhancedReportGenerator:
             self.pdf.cell(0, 10, "No insights available.", ln=True)
         else:
             for insight in insights:
-                self.pdf.cell(0, 10, f"• {insight.get('recommendation', 'No recommendation')}", ln=True)
+                self.pdf.cell(0, 10, f"* {insight.get('recommendation', 'No recommendation')}", ln=True)
                 self.pdf.multi_cell(0, 6, f"{insight.get('description', 'No details provided.')}", ln=True)
                 self.pdf.ln(2)  # Space between insights
