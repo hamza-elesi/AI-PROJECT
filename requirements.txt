@@ -11,7 +11,7 @@ aiohttp
 requests
 pytest
 pytest-asyncio
-
+sqlite3 >= 3.35.0
 # Testing
 pytest-mock
 
@@ -32,3 +32,4 @@ lxml
 
 # URL handling
 urllib3
+sqlite3
