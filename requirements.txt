@@ -32,4 +32,3 @@ lxml
 
 # URL handling
 urllib3
-sqlite3
