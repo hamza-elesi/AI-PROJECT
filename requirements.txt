@@ -1,5 +1,6 @@
 # requirements.txt
 crawl4ai
+pysqlite3-binary
 # Core dependencies
 openai
 streamlit

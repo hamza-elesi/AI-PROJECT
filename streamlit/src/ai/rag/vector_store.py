@@ -13,22 +13,20 @@ from chromadb.config import Settings
 class VectorStore:
     """Manages embeddings and similarity search for SEO data."""
 
-    def _init_(self):
-        """Initialize the ChromaDB vector store with DuckDB backend."""
+    def __init__(self):
+        """Initialize the ChromaDB vector store with persistence."""
+        # Define persistence directory
         persist_dir = Path(__file__).parent.parent.parent / 'knowledge' / 'embeddings'
-        persist_dir.mkdir(parents=True, exist_ok=True)
+        persist_dir.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
 
+        # Initialize ChromaDB with correct settings
         try:
-            self.client = chromadb.PersistentClient(
-                path=str(persist_dir),
-                settings=Settings(chroma_db_impl="duckdb")  # Use DuckDB as backend
-            )
+            self.client = chromadb.PersistentClient(path=str(persist_dir))
             self.collection = self.client.get_or_create_collection("seo_embeddings")
-            print("✅ VectorStore Initialized Successfully with DuckDB")
+            print("✅ VectorStore Initialized Successfully")
         except Exception as e:
-            print(f"❌ Error initializing ChromaDB with DuckDB: {e}")
-            self.collection = None
-
+            print(f"❌ Error initializing ChromaDB: {e}")
+            self.collection = None  # Prevent operations on a failed initialization
 
     def add_embeddings(self, data: Dict[str, Any], category: str):
         """Add new embeddings to the store."""
