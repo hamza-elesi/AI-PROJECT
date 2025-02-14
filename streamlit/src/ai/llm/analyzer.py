@@ -76,7 +76,7 @@ class LLMAnalyzer:
                     {"role": "user", "content": prompt}
                 ],
                 response_format={"type": "json_object"},  # ✅ Enforce JSON response format
-                temperature=0.7,
+                temperature=1,
                 max_tokens=800  # ✅ Increased token count for more detailed responses
             )
 

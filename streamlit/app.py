@@ -16,7 +16,7 @@ import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 # Load environment variables
-load_dotenv()
+load_dotenv(override=True)
 
 class SEOApp:
     def __init__(self, data_collector, report_generator):
