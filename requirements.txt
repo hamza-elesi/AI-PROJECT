@@ -12,7 +12,7 @@ aiohttp
 requests
 pytest
 pytest-asyncio
-pysqlite3-binary>=3.35.0
+# pysqlite3-binary>=3.35.0
 # Testing
 pytest-mock
 
