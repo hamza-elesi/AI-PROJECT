@@ -4,8 +4,19 @@ from pathlib import Path
 import sys
 import apsw
 import sys
+# Create a wrapper class to make APSW compatible with sqlite3 interface
+class APSWWrapper:
+    def __init__(self):
+        self.apsw = apsw
+        self.Connection = apsw.Connection
+        self.Cursor = apsw.Cursor
+        self.sqlite_version_info = apsw.apswversion
+        
+    def connect(self, *args, **kwargs):
+        return self.Connection(*args, **kwargs)
 
-sys.modules['sqlite3'] = apsw
+# Replace sqlite3 with our wrapper
+sys.modules['sqlite3'] = APSWWrapper()
 
 import chromadb
 from chromadb.config import Settings
