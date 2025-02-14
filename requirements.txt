@@ -4,7 +4,6 @@ crawl4ai
 openai
 streamlit
 chromadb
-pysqlite3-binary
 reportlab
 python-dotenv
 beautifulsoup4
