@@ -10,7 +10,8 @@ class APSWWrapper:
         self.apsw = apsw
         self.Connection = apsw.Connection
         self.Cursor = apsw.Cursor
-        self.sqlite_version_info = apsw.apswversion
+        # Convert version string to tuple for proper comparison
+        self.sqlite_version_info = tuple(map(int, apsw.apswversion.split('.')))
         
     def connect(self, *args, **kwargs):
         return self.Connection(*args, **kwargs)
