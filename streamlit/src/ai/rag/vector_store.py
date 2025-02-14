@@ -1,11 +1,9 @@
 from typing import Dict, Any, List
-import os
 from pathlib import Path
-import sys
-import apsw
-import sys
 # Create a wrapper class to make APSW compatible with sqlite3 interface
-
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import chromadb
 from chromadb.config import Settings
 
