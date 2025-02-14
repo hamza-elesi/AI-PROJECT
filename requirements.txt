@@ -2,9 +2,9 @@
 crawl4ai
 # Core dependencies
 openai
-streamlit==1.42.0
-chromadb==0.6.3
-pysqlite3-binary==0.5.4
+streamlit
+chromadb
+pysqlite3-binary
 reportlab
 python-dotenv
 beautifulsoup4
