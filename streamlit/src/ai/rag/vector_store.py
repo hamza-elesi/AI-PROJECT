@@ -1,6 +1,6 @@
 from typing import Dict, Any, List
 from pathlib import Path
-# Create a wrapper class to make APSW compatible with sqlite3 interface
+
 __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
