@@ -5,19 +5,6 @@ import sys
 import apsw
 import sys
 # Create a wrapper class to make APSW compatible with sqlite3 interface
-class APSWWrapper:
-    def __init__(self):
-        self.apsw = apsw
-        self.Connection = apsw.Connection
-        self.Cursor = apsw.Cursor
-        # Convert version string to tuple for proper comparison
-        self.sqlite_version_info = tuple(map(int, apsw.apswversion.split('.')))
-        
-    def connect(self, *args, **kwargs):
-        return self.Connection(*args, **kwargs)
-
-# Replace sqlite3 with our wrapper
-sys.modules['sqlite3'] = APSWWrapper()
 
 import chromadb
 from chromadb.config import Settings
@@ -26,20 +13,22 @@ from chromadb.config import Settings
 class VectorStore:
     """Manages embeddings and similarity search for SEO data."""
 
-    def __init__(self):
-        """Initialize the ChromaDB vector store with persistence."""
-        # Define persistence directory
+    def _init_(self):
+        """Initialize the ChromaDB vector store with DuckDB backend."""
         persist_dir = Path(__file__).parent.parent.parent / 'knowledge' / 'embeddings'
-        persist_dir.mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+        persist_dir.mkdir(parents=True, exist_ok=True)
 
-        # Initialize ChromaDB with correct settings
         try:
-            self.client = chromadb.PersistentClient(path=str(persist_dir))
+            self.client = chromadb.PersistentClient(
+                path=str(persist_dir),
+                settings=Settings(chroma_db_impl="duckdb")  # Use DuckDB as backend
+            )
             self.collection = self.client.get_or_create_collection("seo_embeddings")
-            print("✅ VectorStore Initialized Successfully")
+            print("✅ VectorStore Initialized Successfully with DuckDB")
         except Exception as e:
-            print(f"❌ Error initializing ChromaDB: {e}")
-            self.collection = None  # Prevent operations on a failed initialization
+            print(f"❌ Error initializing ChromaDB with DuckDB: {e}")
+            self.collection = None
+
 
     def add_embeddings(self, data: Dict[str, Any], category: str):
         """Add new embeddings to the store."""
