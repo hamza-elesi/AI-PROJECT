@@ -151,7 +151,7 @@ class SEOApp:
 
 if __name__ == "__main__":
     rate_limiter = RateLimiter()
-    moz_client = MozClient(api_token=os.getenv("MOZ_TOKEN"), rate_limiter=rate_limiter)
+    moz_client = MozClient(api_token=st.secrets["MOZ_TOKEN"], rate_limiter=rate_limiter)
     scraper = SEOScraper()
     cache = DataCache()
     data_collector = DataCollector(moz_client, scraper, cache)

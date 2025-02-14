@@ -1,6 +1,13 @@
 from typing import Dict, Any, List
 import os
 from pathlib import Path
+import sys
+try:
+    import pysqlite3
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+except ImportError:
+    pass  # Handle the case where pysqlite3 isn't available
+
 import chromadb
 from chromadb.config import Settings
 
