@@ -13,34 +13,6 @@ class SEOKnowledgeBase:
         print(f"Knowledge base path: {self.base_path}")
         self.knowledge = self.load_knowledge()
 
-    # def load_knowledge(self) -> Dict[str, Any]:
-    #     """Load all SEO knowledge from JSON files"""
-    #     knowledge = {}
-        
-    #     # Load technical SEO guidelines
-    #     knowledge['technical'] = self._load_category('technical_seo')
-        
-    #     # Load content guidelines
-    #     knowledge['content'] = self._load_category('content_seo')
-        
-    #     # Load backlink guidelines
-    #     knowledge['backlinks'] = self._load_category('backlink_analysis')
-        
-    #     return knowledge
-    
-    # def load_knowledge(self) -> Dict[str, Any]:
-    #     """Load all SEO knowledge from JSON files"""
-    #     print("\n3. Loading Knowledge Base:")
-    #     knowledge = {}
-        
-    #     # Load each category with verification
-    #     for category in ['technical', 'content', 'backlinks']:
-    #         data = self._load_category(category)
-    #         print(f"Loaded {category} knowledge: {bool(data)}")
-    #         knowledge[category] = data
-        
-    #     return knowledge
-
     def load_knowledge(self) -> Dict[str, Any]:
         """Load all SEO knowledge from JSON files"""
         knowledge = {}
@@ -86,21 +58,7 @@ class SEOKnowledgeBase:
         """Get specific guidelines from the knowledge base"""
         return self.knowledge.get(category, {}).get(aspect, {})
 
-    # def get_recommendations(self, category: str, metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
-    #     """Get recommendations based on metrics"""
-    #     guidelines = self.get_guidelines(category, 'recommendations')
-    #     recommendations = []
-        
-    #     for metric, value in metrics.items():
-    #         if metric in guidelines:
-    #             recommendations.extend(self._evaluate_metric(
-    #                 metric, 
-    #                 value, 
-    #                 guidelines[metric]
-    #             ))
-                
-    #     return recommendations
-    
+
     def get_recommendations(self, category: str, metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Get recommendations with detailed logging"""
         print(f"\n4. Getting Recommendations for {category}:")

@@ -10,6 +10,58 @@ class RAGProcessor:
         self.knowledge_base = SEOKnowledgeBase()
         self.vector_store = VectorStore()
 
+    # async def process(self, seo_data: Dict[str, Any]) -> Dict[str, Any]:
+    #     """Process SEO data and generate enhanced insights."""
+    #     print("🟢 Starting RAG Processing...")
+    #     print("\n=== Starting RAG Processing Debug ===")
+        
+    #     technical_data = seo_data.get('technical_seo', {}).get('metrics', {})
+    #     content_data = seo_data.get('content_data', {}).get('metrics', {})
+    #     backlink_data = seo_data.get('backlink_data', {}).get('metrics', {}) 
+
+
+    #     # Get relevant insights with structured data
+    #     technical_insights = await self._analyze_technical(technical_data)
+    #     content_insights = await self._analyze_content(content_data)
+    #     backlink_insights = await self._analyze_backlinks(backlink_data)
+
+
+    #     # Debugging: Check if insights are being generated
+    #     print(f"🔹 Technical Insights: {technical_insights}")
+    #     print(f"🔹 Content Insights: {content_insights}")
+    #     print(f"🔹 Backlink Insights: {backlink_insights}")
+        
+    #     # Find similar cases
+    #     similar_cases = self.vector_store.find_similar(seo_data)
+
+    #     # Debugging: Check if similar cases are found
+    #     print(f"🔹 Similar Cases: {similar_cases}")
+
+    #     # Store new case in vector store
+    #     self._store_embeddings(seo_data)
+
+    #     # Ensure no empty insights
+    #     if not technical_insights:
+    #         print("⚠️ No technical insights found. Using fallback recommendations.")
+    #         technical_insights = self._generate_fallback_technical_insights(seo_data)
+
+    #     if not content_insights:
+    #         print("⚠️ No content insights found. Using fallback recommendations.")
+    #         content_insights = self._generate_fallback_content_insights(seo_data)
+
+    #     if not backlink_insights:
+    #         print("⚠️ No backlink insights found. Using fallback recommendations.")
+    #         backlink_insights = self._generate_fallback_backlink_insights(seo_data)
+
+    #     return {
+    #         'technical_insights': technical_insights,
+    #         'content_insights': content_insights,
+    #         'backlink_insights': backlink_insights,
+    #         'similar_cases': similar_cases
+    #     }
+
+
+    # Modify the process method in RAGProcessor class
     async def process(self, seo_data: Dict[str, Any]) -> Dict[str, Any]:
         """Process SEO data and generate enhanced insights."""
         print("🟢 Starting RAG Processing...")
@@ -19,14 +71,10 @@ class RAGProcessor:
         content_data = seo_data.get('content_data', {}).get('metrics', {})
         backlink_data = seo_data.get('backlink_data', {}).get('metrics', {}) 
 
-        # Get relevant insights
         # Get relevant insights with structured data
         technical_insights = await self._analyze_technical(technical_data)
         content_insights = await self._analyze_content(content_data)
         backlink_insights = await self._analyze_backlinks(backlink_data)
-        # technical_insights = await self._analyze_technical(seo_data.get('technical_seo', {}))
-        # content_insights = await self._analyze_content(seo_data.get('scraped_data', {}))
-        # backlink_insights = await self._analyze_backlinks(seo_data.get('moz_data', {}))
 
         # Debugging: Check if insights are being generated
         print(f"🔹 Technical Insights: {technical_insights}")
@@ -55,12 +103,22 @@ class RAGProcessor:
             print("⚠️ No backlink insights found. Using fallback recommendations.")
             backlink_insights = self._generate_fallback_backlink_insights(seo_data)
 
-        return {
+        # Create response dict
+        response_dict = {
             'technical_insights': technical_insights,
             'content_insights': content_insights,
             'backlink_insights': backlink_insights,
             'similar_cases': similar_cases
         }
+        
+        # Validate with Pydantic
+        try:
+            from src.models.seo_models import RAGResponse
+            validated_response = RAGResponse(**response_dict)
+            return validated_response.dict()
+        except Exception as e:
+            print(f"⚠️ RAG Response validation error: {e}, returning unvalidated data")
+            return response_dict
 
     async def _analyze_technical(self, technical_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Analyze technical SEO aspects."""

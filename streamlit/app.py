@@ -244,6 +244,21 @@ class SEOApp:
             )
 
     def _display_results(self, data, enhanced_insights):
+            # Add executive summary
+        st.header("📊 Executive Summary")
+        if enhanced_insights.get("summary"):
+                summary = enhanced_insights.get("summary")
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.metric("Total Insights", summary.get("total_insights", 0))
+                with col2:
+                    st.metric("Critical Issues", summary.get("critical_issues", 0))
+                with col3:
+                    st.metric("Technical Score", f"{summary.get('technical_score', 0)}%")
+                with col4:
+                    st.metric("Content Score", f"{summary.get('content_score', 0)}%")
+        else:
+                st.info("No executive summary available. Please analyze your website to generate insights.")
         st.subheader("📊 SEO Metrics Overview")
         MetricsDisplay.show_overview(data.get("overview", {}))
 
