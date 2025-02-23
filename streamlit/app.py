@@ -177,9 +177,9 @@ from src.api.rate_limiter import RateLimiter
 from src.ai.insights.generator import AIInsightsGenerator
 import os
 from dotenv import load_dotenv
-# __import__('pysqlite3')
-# import sys
-# sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 # Load environment variables
 load_dotenv(override=True)
