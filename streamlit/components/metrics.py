@@ -8,6 +8,7 @@ class MetricsDisplay:
     @staticmethod
     def show_overview(overview: Dict[str, Any]):
         """Display general SEO metrics overview."""
+        from components.report import ReportDisplay
         st.subheader("Overview Metrics")
 
         if not overview:

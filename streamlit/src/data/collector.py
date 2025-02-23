@@ -1,3 +1,4 @@
+import traceback
 from typing import Dict, Any
 from ..scraper.web_scraper import SEOScraper
 import asyncio
@@ -83,26 +84,50 @@ class DataCollector:
                 'spam_score': metrics.get('spam_score', 0)
             }
         }
-
     async def collect_moz_data(self, url: str) -> Dict[str, Any]:
-        """
-        Collect Moz API data.
-        :param url: The URL to collect Moz metrics for.
-        :return: Moz metrics and backlink data.
-        """
         try:
             print(f"📊 Fetching Moz Metrics for {url}...")
+            
+            # Add debug logging
+            print(f"🔍 Moz Client: {self.moz_client}")
+            
             metrics = await self.moz_client.get_domain_metrics(url)
-
+            
+            # Add more detailed logging
+            print(f"🔍 Moz API Response: {metrics}")
+            
             if not metrics:
-                print("⚠️ Moz Metrics Data is Empty")
+                print("⚠️ Moz Metrics Data is Empty - Possible Reasons:")
+                print("1. Invalid API credentials")
+                print("2. URL not in Moz's index")
+                print("3. API rate limit exceeded")
                 return {}
-
+                
             return {"metrics": metrics}
-
         except Exception as e:
             print(f"❌ Moz API Error: {e}")
+            print(f"❌ Stack Trace: {traceback.format_exc()}")
             return {"error": str(e)}
+
+    # async def collect_moz_data(self, url: str) -> Dict[str, Any]:
+    #     """
+    #     Collect Moz API data.
+    #     :param url: The URL to collect Moz metrics for.
+    #     :return: Moz metrics and backlink data.
+    #     """
+    #     try:
+    #         print(f"📊 Fetching Moz Metrics for {url}...")
+    #         metrics = await self.moz_client.get_domain_metrics(url)
+
+    #         if not metrics:
+    #             print("⚠️ Moz Metrics Data is Empty")
+    #             return {}
+
+    #         return {"metrics": metrics}
+
+    #     except Exception as e:
+    #         print(f"❌ Moz API Error: {e}")
+    #         return {"error": str(e)}
 
     async def collect_scraped_data(self, url: str) -> Dict[str, Any]:
         """
